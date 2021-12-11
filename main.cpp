@@ -354,6 +354,7 @@
 using std::string; 
 #include "gl/glut.h"   // - An interface and windows 
 
+
 //colors for submenu
 #define BLACK 1
 #define WHITE 2
@@ -417,120 +418,124 @@ int mousex, mousey;           // Mouse x,y coords, in GLUT format (pixels from u
 							  // Only guaranteed to be valid if a mouse button is down.
 							  // Saved by mouse, motion.
 
+void printbitmap(const string msg, double x, double y)
+{
+	glRasterPos2d(x, y);
+	for (string::const_iterator ii = msg.begin();
+		ii != msg.end();
+		++ii)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *ii);
+	}
+}
+
+
+void clearWindow()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// Documentation
+	glColor3d(0.0, 0.0, 0.0);  // Black text
+	printbitmap("Mou vghke"/*"Simple Mouse Demo"*/, 0.1, 0.9);
+	printbitmap("O kwlos"/*"Press left mouse button and move mouse"*/, 0.05, 0.55);
+	printbitmap("Sto debugging"/*"Esc   Quit"*/, 0.15, 0.25);
+}
 
 void Polygon() {
 
-
-	if (mouseleftpressed) {
-
+	if (clearScreen)
+	{
+		clearWindow();
+		firstpt = false;
+		clearScreen = false;
+	}
+		
+	if (mouseleftpressed && polygonEnabled)
+	{ 
+		 
 		// Convert mouse position to OpenGL's coordinate system
 		double oglx = double(mousex) / winw;
 		double ogly = 1 - double(mousey) / winh;
-
-		glColor3f(line_red, line_green, line_blue);
-		glPointSize(3);
-
+		glColor3f(red, green, blue);
+		glPointSize(pointsize);
+		// glBegin(GL_POLYGON);
+		        
+		        
+		        
 		if (!firstpt)
 		{
-			glBegin(GL_POINTS);
-			glVertex2d(oglx, ogly);
-			glEnd();
-			pt1x = oglx;
-			pt1y = ogly;
-			pointsTaken[arraySlot++] = pt1x;
-			pointsTaken[arraySlot++] = pt1y;
-			firstpt = true;
+		    glBegin(GL_POINTS);
+		    glVertex2d(oglx, ogly);
+		    glEnd();
+		    pt1x = oglx;
+		    pt1y = ogly;
+		    pointsTaken[arraySlot++] = pt1x;
+		    pointsTaken[arraySlot++] = pt1y;
+		    firstpt = true;
 		}
 		else
 		{
-			pt2x = oglx;
-			pt2y = ogly;
-			//glRectd(pt1x, pt1y, pt2x, pt2y);
-			glBegin(GL_POINTS);
-			glVertex2d(pt2x, pt2y);
-			glEnd();
-			glBegin(GL_LINE_STRIP);
-			glVertex2d(pt1x, pt1y);
-			glVertex2d(pt2x, pt2y);
-			glEnd();
-			pointsTaken[arraySlot++] = pt2x;
-			pointsTaken[arraySlot++] = pt2y;
-			//move last point to first
-			pt1x = pt2x;
-			pt1y = pt2y;
+		    pt2x = oglx;
+		    pt2y = ogly;
+		    //glRectd(pt1x, pt1y, pt2x, pt2y);
+		    glBegin(GL_POINTS);
+		    glVertex2d(pt2x, pt2y);
+		    glEnd();
+		    glBegin(GL_LINE_STRIP);
+		    glVertex2d(pt1x, pt1y);
+		    glVertex2d(pt2x, pt2y);
+		    glEnd();
+		    pointsTaken[arraySlot++] = pt2x;
+		    pointsTaken[arraySlot++] = pt2y;
+		    //move last point to first
+		    pt1x = pt2x;
+		    pt1y = pt2y;
 		}
 		mouseleftpressed = false;
 	}
-
+		
 	if (mouserightpressed) {
 		glBegin(GL_LINE_STRIP);
 		glVertex2d(pt1x, pt1y);
 		glVertex2d(pointsTaken[0], pointsTaken[1]);
 		glEnd();
+		/*glBegin(GL_POLYGON);
+		for (int i = 0; i == arraySlot / 2; i+=2) {
+		    glVertex2d(pointsTaken[i], pointsTaken[i + 1]);
+		}
+		glEnd();*/
+		//glEnd();
+		// activate and specify pointer to vertex array
+		//glenableclientstate(gl_vertex_array);
+		//glvertexpointer(3, gl_float, 0, vertices);
+		
+		//// draw a cube
+		//gldrawelements(gl_triangles, 36, gl_unsigned_byte, indices);
+		
+		//// deactivate vertex arrays after drawing
+		//gldisableclientstate(gl_vertex_array);
 		arraySlot = 0;
 		mouserightpressed = false;
 		firstpt = false;
 	}
-
+	glFlush();
+	//glutSwapBuffers();
 }
-
-
-/*
-
-		//while (mouserightpressed) {
-
-		if (mouseleftpressed) {
-
-			// Convert mouse position to OpenGL's coordinate system
-			double oglx = double(mousex) / winw;
-			double ogly = 1 - double(mousey) / winh;
-
-			glColor3f(line_red, line_green, line_blue);
-			glPointSize(10);
-
-			//while (mouserightpressed) {
-
-			glBegin(GL_POINTS);
-			glVertex2d(oglx, ogly);
-			glEnd();
-
-			pt1x = oglx;
-			pt1y = ogly;
-
-
-
-
-			//}
-
-			//glBegin(GL_POLYGON);
-			//glVertex2f(pt1x, pt1y);
-			//glEnd();
-
-
-			mouseleftpressed = false;
-
-		}
-
-		//}
-	*/
-
-
 
 
 void Render()
 {
-	glClearColor(1.0, 1.0, 1.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clean up the colour of the window
+
+	Polygon();
+	//glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clean up the colour of the window
 														 // and the depth buffer
 
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadIdentity();
 
 
-	Polygon();
-
-
-	glutSwapBuffers();             // All drawing commands applied to the 
+	//glutSwapBuffers();             // All drawing commands applied to the 
 								   // hidden buffer, so now, bring forward
 								 // the hidden buffer and hide the visible one           
 
@@ -543,7 +548,7 @@ void Keyboard(unsigned char key, int x, int y)
 {
     switch (key)
     {
-    case 'C': /*std::cout << "mou gamietai"*/clearScreen = true;
+    case 'C': clearScreen = true;
         break;
     case ESCKEY:
     case 'X': exit(0);
@@ -574,11 +579,11 @@ void Mouse(int button, int state, int x, int y) {
 
 }
 
-
 void MainMenuSelect(int choice) {
 
 	switch (choice) {
 	case POLYGON:
+		polygonEnabled = true;
 		Polygon();
 		break;
 		//case CLIPPING:
@@ -588,8 +593,7 @@ void MainMenuSelect(int choice) {
 		//	Polygon();
 		//	break;
 	case CLEAR:
-		glClearColor(1.0, 1.0, 1.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		clearScreen = true;
 		break;
 	case EXIT:
 		exit(0);
@@ -728,20 +732,78 @@ void Idle()
 void Setup()  // DON'T TOUCH IT 
 {
 	// Black background
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 
 }
 
 
 /////////////// Main Program ///////////////////////////
 
+//int main(int argc, char* argv[])
+//{ 
+//  // initialize GLUT library state
+//  glutInit(&argc, argv);
+//	
+//  // Set up the display using the GLUT functions to 
+//  // get rid of the window setup details:
+//  // - Use true RGB colour mode ( and transparency )
+//  // - Enable double buffering for faster window update
+//  // - Allocate a Depth-Buffer in the system memory or 
+//  //   in the video memory if 3D acceleration available	
+//  glutInitDisplayMode(GLUT_RGBA|GLUT_SINGLE);
+// 
+//  
+//  // Define the main window size and initial position 
+//  // ( upper left corner, boundaries included )
+//  glutInitWindowSize(600, 500);
+//  glutInitWindowPosition(650, 300);
+//
+//  // Create and label the main window
+//  glutCreateWindow("Ntaks Kserw Gw ergasia kserw gw na oume");
+//  
+//  // Configure various properties of the OpenGL rendering context
+//  Setup();
+//  
+//  // Callbacks for the GL and GLUT events:
+//
+//  // The rendering function 
+//  glutDisplayFunc(Render);
+//  glutReshapeFunc(Resize);
+//  
+//  //glutIdleFunc(Idle);
+//
+//  //manage keyboard mouse
+//  glutKeyboardFunc(Keyboard);
+//  glutMouseFunc(Mouse);
+//  //glutMotionFunc(Motion);
+//
+//  //create main menu
+//  glutCreateMenu(MenuSelect);
+//  glutAddMenuEntry("Polygon", POLYGON);
+//  glutAddMenuEntry("Black", BLACK);
+//  glutAddMenuEntry("Red", RED);
+//  glutAddMenuEntry("Blue", BLUE);
+//  glutAddMenuEntry("Clear", CLEAR);
+//  glutAddMenuEntry("Exit", EXIT);
+//
+//  //// attach the menu to the right button
+//
+//  glutAttachMenu(GLUT_RIGHT_BUTTON);
+//
+//  clearWindow();
+//  //Enter main event handling loop
+//  glutMainLoop();
+//  return 0;
+//
+//}  
+
 int main(int argc, char* argv[]) {
 
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_SINGLE);
 
 	glutInitWindowSize(600, 500);
-	glutInitWindowPosition(50, 50);
+	glutInitWindowPosition(650, 300);
 	glutCreateWindow("Grafika Upologistwn - Ergasia 1");
 
 
@@ -796,6 +858,9 @@ int main(int argc, char* argv[]) {
 	// attach the menu to the right button
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 	//Enter main event handling loop
+	
+	clearWindow();
+	
 	glutMainLoop();
 	return 0;
 
