@@ -499,6 +499,7 @@ void Polygon() {
 		glVertex2d(pt1x, pt1y);
 		glVertex2d(pointsTaken[0], pointsTaken[1]);
 		glEnd();
+
 		/*glBegin(GL_POLYGON);
 		for (int i = 0; i == arraySlot / 2; i+=2) {
 		    glVertex2d(pointsTaken[i], pointsTaken[i + 1]);
@@ -568,14 +569,15 @@ void Mouse(int button, int state, int x, int y) {
 		//if (mouseleftpressed)
 		glutPostRedisplay();  // Left button has changed; redisplay
 	}
-	else if (button == GLUT_RIGHT_BUTTON) {
-		mouserightpressed = (state == GLUT_UP);
-		//exit(0);
-	}
 
 	//Save the mouse position
 	mousex = x;
 	mousey = y;
+
+	if (button == GLUT_RIGHT_BUTTON) {
+		mouserightpressed = (state == GLUT_UP);
+		glutPostRedisplay();
+	}
 
 }
 
