@@ -72,8 +72,6 @@ int polygonInArray = 0;
 GLuint width = 600;
 GLuint height = 500;
 
-GLfloat xcorner = -0.5f;
-GLfloat ycorner = -0.5f;
 
 int bMoving = 0;
 
@@ -245,10 +243,11 @@ void Polygon()
 		mouseleftpressed = false;
 	}
 
-	if (editMode) 
+	if (mouseleftpressed && editMode)
 	{	
 		//give somehow the choosen polygon
-
+		
+		//draw polygon without fill
 		glColor3f(fill_red, fill_green, fill_blue);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, polygonVerticies);
@@ -262,10 +261,11 @@ void Polygon()
 
 	if (mouserightpressed && polygonEnabled )
 	{
+		//draw polygon no fill
 		glColor3f(fill_red, fill_green, fill_blue);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, polygonVerticies);
-		glDrawArrays(GL_POLYGON, 0, vertexInArray / 2);
+		glDrawArrays(GL_POLYGON, 0, polygons[0] / 2);
 		glDisableClientState(GL_VERTEX_ARRAY);
 
 		polygons[polygonInArray++] = vertexInArray;
