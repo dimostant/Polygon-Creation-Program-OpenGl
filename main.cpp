@@ -25,7 +25,8 @@ using std::string;
 
 //polygon
 const int ESCKEY = 27;
-const int N = 1000;
+const int N = 10000;
+const int M = 10000;
 
 bool firstpt = false;
 bool polygonEnabled = false;
@@ -59,10 +60,14 @@ bool mouserightpressed = false;
 // Saved by mouse.
 int mousex, mousey;           // Mouse x,y coords, in GLUT format (pixels from upper-left corner).
 							  // Only guaranteed to be valid if a mouse button is down.
-							  // Saved by mouse, motion.
-
+							  // Saved by mouse, motion
 GLfloat polygonVerticies[N];
-int arraySlot = 0;
+int vertexInArray = 0; // every 2n is x cord , every 2n + 1 is y cord
+int polygons[M]; // every polygon number of vetrexes is stored in every different M
+int polygonInArray = 0;
+
+GLuint width = 600;
+GLuint height = 500;
 
 void printbitmap(const string msg, double x, double y)
 {
@@ -85,6 +90,21 @@ void clearWindow()
 	printbitmap("Mou vghke"/*"Simple Mouse Demo"*/, 0.1, 0.9);
 	printbitmap("O kwlos"/*"Press left mouse button and move mouse"*/, 0.05, 0.55);
 	printbitmap("Sto debugging"/*"Esc   Quit"*/, 0.15, 0.25);
+	
+	//clear written arrays
+	for (int i = 0; i < vertexInArray; i++)
+	{
+		polygonVerticies[i] = 0;
+	}
+
+	vertexInArray = 0;
+
+	for (int i = 0; i < polygonInArray; i++)
+	{
+		polygonVerticies[i] = 0;
+	}
+
+	polygonInArray = 0;
 }
 
 
@@ -154,9 +174,10 @@ void Polygon()
 			glEnd();
 			pt1x = oglx;
 			pt1y = ogly;
-			polygonVerticies[arraySlot++] = pt1x;
-			polygonVerticies[arraySlot++] = pt1y;
+			polygonVerticies[vertexInArray++] = pt1x;
+			polygonVerticies[vertexInArray++] = pt1y;
 			firstpt = true;
+			printf("first point : %f, %f \n", pt1x, pt1y);
 		}
 		else
 		{
@@ -170,12 +191,14 @@ void Polygon()
 			glVertex2d(pt2x, pt2y);
 			glEnd();
 
-			polygonVerticies[arraySlot++] = pt2x;
-			polygonVerticies[arraySlot++] = pt2y;
+			polygonVerticies[vertexInArray++] = pt2x;
+			polygonVerticies[vertexInArray++] = pt2y;
 
 			//move last point to first
 			pt1x = pt2x;
 			pt1y = pt2y;
+
+			printf("next point : %f, %f \n", pt2x, pt2y);
 		}
 
 		mouseleftpressed = false;
@@ -183,15 +206,45 @@ void Polygon()
 
 	if (mouserightpressed)
 	{
+		/*glColor3f(fill_red, fill_green, fill_blue);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 0, polygonVerticies);
+		glDrawArrays(GL_POLYGON, 0, ((polygons[polygonInArray] )/ 2) );
+		glDisableClientState(GL_VERTEX_ARRAY);*/
+		
+		polygons[polygonInArray++] = vertexInArray / (polygonInArray + 1);
+
 		glColor3f(fill_red, fill_green, fill_blue);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, polygonVerticies);
-		glDrawArrays(GL_POLYGON, 0, arraySlot / 2);
+		glDrawArrays(GL_POLYGON, vertexInArray - polygons[polygonInArray - 1], polygons[polygonInArray - 1] / 2);
 		glDisableClientState(GL_VERTEX_ARRAY);
 
-		arraySlot = 0;
+		printf("first : %d, count : %d\n", vertexInArray - polygons[polygonInArray - 1], polygons[polygonInArray - 1] / 2);
+
+		printf("\nVertex in array : %d\n", vertexInArray);
+		printf("\nPolygons in array : %d\n", polygonInArray);
+
+
+		printf("all verticies : \n");
+		for (int i = 0; i < vertexInArray; i++)
+		{
+			printf("x: %f, y: %f \n", polygonVerticies[i++], polygonVerticies[i]);
+		}
+		
+		printf("verticies per poly : \n");
+		for (int i = 0; i < polygonInArray; i++)
+		{
+			printf("polygon : %d ,num of verticies : %d \n", i + 1, polygons[i]);
+		}
+		printf("\n\n\n");
+
+		//vertexInArray = 0;
+		
 		mouserightpressed = false;
 		firstpt = false;
+
+
 	}
 
 	glFlush();
