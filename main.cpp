@@ -198,7 +198,7 @@ void Polygon()
 			pt1x = pt2x;
 			pt1y = pt2y;
 
-			printf("next point : %f, %f \n", pt2x, pt2y);
+			printf("next point : %f, %f \n , vertexInArray : %d \n", pt2x, pt2y, vertexInArray);
 		}
 
 		mouseleftpressed = false;
@@ -206,15 +206,18 @@ void Polygon()
 
 	if (mouserightpressed)
 	{
+		int vertexPos = 0;
+		for (int i = 0; i < polygonInArray; i++) {
+			vertexPos += polygons[i];
+		}
 
-		polygons[polygonInArray++] = vertexInArray / (polygonInArray + 1);
+		polygons[polygonInArray] = vertexInArray - vertexPos;
 
-		int arrlength = polygons[polygonInArray - 1];
-		GLfloat *tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat)* arrlength);
+		GLfloat *tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat)* polygons[polygonInArray]);
 
-		for (int i = 0; i < polygons[polygonInArray - 1]; i++)
+		for (int i = 0; i < polygons[polygonInArray]; i++)
 		{
-			tmpVertArr[i] = polygonVerticies[vertexInArray - polygons[polygonInArray - 1] + i];
+			tmpVertArr[i] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i];
 			if (i == 0 || i % 2 == 0)
 				printf("tmpVertArr[%d],x : %f", i, tmpVertArr[i]);
 			else
@@ -224,14 +227,14 @@ void Polygon()
 		glColor3f(fill_red, fill_green, fill_blue);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, tmpVertArr);
-		glDrawArrays(GL_POLYGON, 0, arrlength / 2);
+		glDrawArrays(GL_POLYGON, 0, polygons[polygonInArray] / 2);
 		glDisableClientState(GL_VERTEX_ARRAY);
 
 		//debug
-		printf("first : %d, count : %d\n", vertexInArray - polygons[polygonInArray - 1], polygons[polygonInArray - 1] / 2);
+		printf("first : %d, count : %d\n", vertexInArray - polygons[polygonInArray], polygons[polygonInArray] / 2);
 
-		printf("\nVertex in array : %d\n", vertexInArray);
-		printf("\nPolygons in array : %d\n", polygonInArray);
+		printf("\nVertex in array : %d \n", vertexInArray);
+		printf("\nPolygons in array : %d\n", polygonInArray + 1);
 
 
 		printf("all verticies : \n");
@@ -241,7 +244,7 @@ void Polygon()
 		}
 		
 		printf("verticies per poly : \n");
-		for (int i = 0; i < polygonInArray; i++)
+		for (int i = 0; i < polygonInArray + 1; i++)
 		{
 			printf("polygon : %d ,num of verticies : %d \n", i + 1, polygons[i]);
 		}
@@ -250,7 +253,7 @@ void Polygon()
 		//reset 
 		mouserightpressed = false;
 		firstpt = false;
-
+		polygonInArray++;
 
 	}
 
