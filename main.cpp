@@ -1,4 +1,4 @@
-﻿#include <stdio.h>     // - Just for some ASCII messages
+#include <stdio.h>     // - Just for some ASCII messages
 #include <stdlib.h>
 #include <iostream>
 #include <string>
@@ -21,15 +21,18 @@ using std::string;
 #define CLIPPING 10
 #define EXTRUDE 11
 #define CLEAR 12
-#define EXIT 13
+#define EDIT 13
+#define EXIT 14
 
 //polygon
 const int ESCKEY = 27;
-const int N = 1000;
+const int N = 10000; //length of available vetexes * 2 (saves pos x,y)
+const int M = 10000; //length of available polygons
 
 bool firstpt = false;
 bool polygonEnabled = false;
 bool clearScreen = false;
+bool editMode = false;
 
 const double pointsize = 1;// og 10
 
@@ -62,7 +65,17 @@ int mousex, mousey;           // Mouse x,y coords, in GLUT format (pixels from u
 							  // Saved by mouse, motion.
 
 GLfloat polygonVerticies[N];
-int arraySlot = 0;
+int vertexInArray = 0; // every 2n is x cord , every 2n + 1 is y cord
+int polygons[M]; // every polygon number of vetrexes is stored in every different M
+int polygonInArray = 0;
+
+GLuint width = 600;
+GLuint height = 500;
+
+GLfloat xcorner = -0.5f;
+GLfloat ycorner = -0.5f;
+
+int bMoving = 0;
 
 void printbitmap(const string msg, double x, double y)
 {
@@ -104,22 +117,73 @@ void Keyboard(unsigned char key, int x, int y)
 }
 
 
+void Screen2GLpos(int x, int y, GLfloat* xpos, GLfloat* ypos)
+{
+	*xpos = ((GLfloat)(x)-(GLfloat)(width / 2)) / (GLfloat)(width / 2);
+	*ypos = ((GLfloat)(-y) + (GLfloat)(height / 2)) / (GLfloat)(height / 2);
+	printf("Transform Screen position (%d,%d) to OpenGL position  (%.3f,%.3f) ", x, y, *xpos, *ypos);
+}
+
+int BestCorner(float x, float y)
+{
+	int i, idx = -1;
+	float dist2, bestdist2 = 1000000;
+
+	for (i = 0; i < vertexInArray; i += 2)
+	{
+		dist2 = (x - polygonVerticies[i]) * (x - polygonVerticies[i]) + (y - polygonVerticies[i + 1]) * (y - polygonVerticies[i + 1]);
+		if (dist2 < bestdist2)
+		{
+			bestdist2 = dist2;
+			idx = i;
+		}
+	}
+
+	return idx;
+}
+
+void OnMouseMove(int x, int y)
+{	
+	GLfloat xmousef, ymousef;
+	int vertex;
+	if (bMoving && editMode)
+	{
+		printf("OnMouseMove :  x=%d y=%d", x, y);
+		Screen2GLpos(x, y, &xmousef, &ymousef);
+		vertex = BestCorner(xmousef, ymousef);
+		polygonVerticies[vertex] = xmousef;
+		polygonVerticies[vertex + 1] = ymousef;
+		glutPostRedisplay();
+
+
+	}
+}
+
+
 // The GLUT mouse function
-void Mouse(int button, int state, int x, int y) 
+void Mouse(int button, int state, int x, int y)
 {
 
 	// Save the left button state
-	if (button == GLUT_LEFT_BUTTON) 
+	if (button == GLUT_LEFT_BUTTON)
 	{
-		mouseleftpressed = (state == GLUT_UP);
-		glutPostRedisplay();  // Left button has changed; redisplay
+		mouseleftpressed = true;
+		if (state == GLUT_UP)
+		{
+			bMoving = 0;
+			glutPostRedisplay();  // Left button has changed; redisplay
+		}
+		else
+		{
+			bMoving = 1;
+		}
 	}
 
 	//Save the mouse position
 	mousex = x;
 	mousey = y;
 
-	if (button == GLUT_RIGHT_BUTTON) 
+	if (button == GLUT_RIGHT_BUTTON)
 	{
 		mouserightpressed = (state == GLUT_UP);
 		glutPostRedisplay();
@@ -128,7 +192,7 @@ void Mouse(int button, int state, int x, int y)
 }
 
 
-void Polygon() 
+void Polygon()
 {
 
 	if (clearScreen)
@@ -154,8 +218,8 @@ void Polygon()
 			glEnd();
 			pt1x = oglx;
 			pt1y = ogly;
-			polygonVerticies[arraySlot++] = pt1x;
-			polygonVerticies[arraySlot++] = pt1y;
+			polygonVerticies[vertexInArray++] = pt1x;
+			polygonVerticies[vertexInArray++] = pt1y;
 			firstpt = true;
 		}
 		else
@@ -170,8 +234,8 @@ void Polygon()
 			glVertex2d(pt2x, pt2y);
 			glEnd();
 
-			polygonVerticies[arraySlot++] = pt2x;
-			polygonVerticies[arraySlot++] = pt2y;
+			polygonVerticies[vertexInArray++] = pt2x;
+			polygonVerticies[vertexInArray++] = pt2y;
 
 			//move last point to first
 			pt1x = pt2x;
@@ -181,17 +245,33 @@ void Polygon()
 		mouseleftpressed = false;
 	}
 
-	if (mouserightpressed)
+	if (editMode) 
+	{	
+		//give somehow the choosen polygon
+
+		glColor3f(fill_red, fill_green, fill_blue);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 0, polygonVerticies);
+		glDrawArrays(GL_POLYGON, 0, polygons[0] / 2);
+		glDisableClientState(GL_VERTEX_ARRAY);
+
+
+		bMoving = false;
+	}
+
+
+	if (mouserightpressed && polygonEnabled )
 	{
 		glColor3f(fill_red, fill_green, fill_blue);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, polygonVerticies);
-		glDrawArrays(GL_POLYGON, 0, arraySlot / 2);
+		glDrawArrays(GL_POLYGON, 0, vertexInArray / 2);
 		glDisableClientState(GL_VERTEX_ARRAY);
 
-		arraySlot = 0;
+		polygons[polygonInArray++] = vertexInArray;
 		mouserightpressed = false;
 		firstpt = false;
+
 	}
 
 	glFlush();
@@ -199,7 +279,7 @@ void Polygon()
 }
 
 
-void LineColorSubMenu(int choice) 
+void LineColorSubMenu(int choice)
 {
 
 	switch (choice) {
@@ -250,7 +330,7 @@ void LineColorSubMenu(int choice)
 }
 
 
-void FillColorSubMenu(int choice) 
+void FillColorSubMenu(int choice)
 {
 
 	switch (choice) {
@@ -301,22 +381,28 @@ void FillColorSubMenu(int choice)
 }
 
 
-void MainMenuSelect(int choice) 
+void MainMenuSelect(int choice)
 {
 
 	switch (choice) {
 	case POLYGON:
 		polygonEnabled = true;
+		editMode = false;
 		Polygon();
 		break;
 		//case CLIPPING:
 		//	Polygon();
-		//  polygonEnabled = true;
+		//  polygonEnabled = false;
 		//	break;
 		//case EXTRUDE:
 		//	Polygon();
-		//  polygonEnabled = true;
+		//  polygonEnabled = false;
 		//	break;
+	case EDIT:
+		editMode = true;
+		polygonEnabled = false;
+		Polygon();
+		break;
 	case CLEAR:
 		clearScreen = true;
 		break;
@@ -383,23 +469,23 @@ void Setup()  // DON'T TOUCH IT
 
 //-------------------- Main Program------------------------------
 
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
 
 	// initialize GLUT library state
 	glutInit(&argc, argv);
 
 	// Set up the display using the GLUT functions to 
-    // get rid of the window setup details:
-    // - Use true RGB colour mode ( and transparency )
-    // - Enable double buffering for faster window update
-    // - Allocate a Depth-Buffer in the system memory or 
-    //   in the video memory if 3D acceleration available
+	// get rid of the window setup details:
+	// - Use true RGB colour mode ( and transparency )
+	// - Enable double buffering for faster window update
+	// - Allocate a Depth-Buffer in the system memory or 
+	//   in the video memory if 3D acceleration available
 	glutInitDisplayMode(GLUT_RGBA | GLUT_SINGLE);
 
 	// Define the main window size and initial position 
 	// ( upper left corner, boundaries included )
-	glutInitWindowSize(600, 500);
+	glutInitWindowSize(width, height);
 	glutInitWindowPosition(650, 300);
 
 	// Create and label the main window
@@ -414,11 +500,12 @@ int main(int argc, char* argv[])
 
 	//glutIdleFunc(Idle);
 
+	
 
 	//manage mouse
 	glutKeyboardFunc(Keyboard);
 	glutMouseFunc(Mouse);
-	//glutMotionFunc(Motion);
+	glutMotionFunc(OnMouseMove);
 
 
 	//create lineColor Sub menu
@@ -452,6 +539,7 @@ int main(int argc, char* argv[])
 	glutAddMenuEntry("Clipping", CLIPPING);
 	glutAddMenuEntry("Extrude", EXTRUDE);
 	glutAddMenuEntry("Clear", CLEAR);
+	glutAddMenuEntry("Edit mode", EDIT);
 	glutAddMenuEntry("Exit", EXIT);
 
 	// attach the menu to the right button
