@@ -1,1 +1,3 @@
-﻿  OpenGLEmpty.vcxproj -> D:\@University\Lessons\4dYear\Graphics\Project\Polygon-Creation-Program-OpenGl\Debug\Ergasia 1.exe
+﻿cl : command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  main.cpp
+  OpenGLEmpty.vcxproj -> C:\Users\athin\Downloads\New folder\Debug\Ergasia 1.exe
