@@ -68,9 +68,13 @@ GLfloat polygonVerticies[N];
 int vertexInArray = 0; // every 2n is x cord , every 2n + 1 is y cord
 int polygons[M]; // every polygon number of vetrexes is stored in every different M
 int polygonInArray = 0;
+int polygonsColors[M*3];
+int colorInArray = 0;
 
 GLuint width = 600;
 GLuint height = 500;
+
+bool lI = false;//(lineIntersection(pt1x, pt1y, pt2x, pt2y))
 
 void printbitmap(const string msg, double x, double y)
 {
@@ -200,8 +204,86 @@ bool lineIntersection(GLfloat p1x, GLfloat p1y, GLfloat q1x, GLfloat q1y, GLfloa
 	return false; // Doesn't fall in any of the above cases
 }
 
+int getVertexPos() {
+	int vertexPos = 0;
+	for (int i = 0; i < polygonInArray; i++) {
+		vertexPos += polygons[i];
+	}
+	return vertexPos;
+}
+
+void PolygonRendering() 
+{
+	printf("\n\nbainw\n\n");
+
+	polygons[polygonInArray] = vertexInArray - getVertexPos();
+
+	GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray]);
+
+	for (int i = 0; i < polygons[polygonInArray]; i++)
+	{
+		tmpVertArr[i] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i];
+		//debug
+		if (i == 0 || i % 2 == 0)
+			printf("tmpVertArr[%d],x : %f", i, tmpVertArr[i]);
+		else
+			printf("tmpVertArr[%d],y : %f \n", i, tmpVertArr[i]);
+	}
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(2, GL_FLOAT, 0, tmpVertArr);
+	glDrawArrays(GL_POLYGON, 0, polygons[polygonInArray] / 2);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	//debug
+	printf("first : %d, count : %d\n", vertexInArray - polygons[polygonInArray], polygons[polygonInArray] / 2);
+	printf("\nVertex in array : %d \n", vertexInArray);
+	printf("\nPolygons in array : %d\n", polygonInArray + 1);
+
+
+	printf("all verticies : \n");
+	for (int i = 0; i < vertexInArray; i++)
+	{
+		printf("x: %f, y: %f \n", polygonVerticies[i++], polygonVerticies[i]);
+	}
+
+	printf("verticies per poly : \n");
+	for (int i = 0; i < polygonInArray + 1; i++)
+	{
+		printf("polygon : %d ,num of verticies : %d \n", i + 1, polygons[i]);
+	}
+	printf("\n\nteleiwsa\n\n");
+	printf("\n\n\n");
+}
+
+void rerender() {
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	int loops = polygonInArray + 2;
+	//Workaround, must be fixed later...
+	int initialpIA = polygonInArray;
+	int initialvIA = vertexInArray;
+
+	polygonInArray = 0;
+	vertexInArray = 0;
+	for (polygonInArray = 0; polygonInArray < loops; polygonInArray++)
+	{
+		std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
+		vertexInArray += polygons[polygonInArray];
+		std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
+		glColor3f(polygonsColors[polygonInArray * 3 + 2], polygonsColors[polygonInArray * 3 + 1], polygonsColors[polygonInArray * 3]);
+		PolygonRendering();
+
+	}
+
+	//Workaround, must be fixed later...
+	polygonInArray = initialpIA;
+	vertexInArray = initialvIA;
+}
+
 void Polygon() 
 {
+	int initialVertexPos = vertexInArray;
 
 	if (clearScreen)
 	{
@@ -215,6 +297,7 @@ void Polygon()
 		// Convert mouse position to OpenGL's coordinate system
 		double oglx = double(mousex) / winw;
 		double ogly = 1 - double(mousey) / winh;
+
 		glColor3f(line_red, line_green, line_blue);
 		glPointSize(pointsize);
 
@@ -246,70 +329,66 @@ void Polygon()
 			polygonVerticies[vertexInArray++] = pt2x;
 			polygonVerticies[vertexInArray++] = pt2y;
 
-			//checkForIntersection(pt1x, pt1y, pt2x, pt2y);
-
 			//move last point to first
 			pt1x = pt2x;
 			pt1y = pt2y;
 
-			printf("next point : %f, %f \n , vertexInArray : %d \n", pt2x, pt2y, vertexInArray);
+			printf("next point : %f, %f ,\n vertexInArray : %d, polygonInArray : %d \n", pt2x, pt2y, vertexInArray, polygonInArray);
+			
+			printf("%d \n", vertexInArray);
+	
+			if (vertexInArray == 6)
+			{	
+				lI = polygonVerticies[vertexInArray - 6] == polygonVerticies[vertexInArray - 2] && polygonVerticies[vertexInArray - 5] == polygonVerticies[vertexInArray - 1];
+				std::cout << lI << "\n";
+			}
+			else
+			{
+				int i = 0;
+				while (getVertexPos() <= vertexInArray - 8 - i * 4) {
+					lI = lineIntersection(
+	 /*changing line :*/polygonVerticies[vertexInArray - 8 - i*2], polygonVerticies[vertexInArray - 7 - i*2], polygonVerticies[vertexInArray - 6 - i*2], polygonVerticies[vertexInArray - 5 - i*2],
+	 /* current line :*/polygonVerticies[vertexInArray - 4], polygonVerticies[vertexInArray - 3], polygonVerticies[vertexInArray - 2], polygonVerticies[vertexInArray - 1]
+					);
+
+					printf("line 1: x1 : %f, y1 : %f, x2 : %f, y2 : %f \nline 2: x3 : %f, y3 : %f, x4 : %f, y4 : %f\n\n",  
+						polygonVerticies[vertexInArray - 8 - i * 4], polygonVerticies[vertexInArray - 7 - i * 4], polygonVerticies[vertexInArray - 6 - i * 4], polygonVerticies[vertexInArray - 5 - i * 4],
+						polygonVerticies[vertexInArray - 4], polygonVerticies[vertexInArray - 3], polygonVerticies[vertexInArray - 2], polygonVerticies[vertexInArray - 1]
+					);
+
+					std::cout << lI << "\n";
+					if (lI == true)
+						break;
+					i++;
+				}
+			}
+
+			if (lI == true)
+			{
+				rerender();
+			}
 		}
 
 		mouseleftpressed = false;
 	}
 
-	if (mouserightpressed)
+	if (mouserightpressed && lI == false)
 	{
-		int vertexPos = 0;
-		for (int i = 0; i < polygonInArray; i++) {
-			vertexPos += polygons[i];
-		}
-
-		polygons[polygonInArray] = vertexInArray - vertexPos;
-
-		GLfloat *tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat)* polygons[polygonInArray]);
-
-		for (int i = 0; i < polygons[polygonInArray]; i++)
-		{
-			tmpVertArr[i] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i];
-			//debug
-			if (i == 0 || i % 2 == 0)
-				printf("tmpVertArr[%d],x : %f", i, tmpVertArr[i]);
-			else
-				printf("tmpVertArr[%d],y : %f \n", i, tmpVertArr[i]);
-		}
-
+		// can write after re-render :
+		//rerender();
 		glColor3f(fill_red, fill_green, fill_blue);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, tmpVertArr);
-		glDrawArrays(GL_POLYGON, 0, polygons[polygonInArray] / 2);
-		glDisableClientState(GL_VERTEX_ARRAY);
+		PolygonRendering();
 
-		//debug
-		printf("first : %d, count : %d\n", vertexInArray - polygons[polygonInArray], polygons[polygonInArray] / 2);
-		printf("\nVertex in array : %d \n", vertexInArray);
-		printf("\nPolygons in array : %d\n", polygonInArray + 1);
+		polygonsColors[colorInArray++] = fill_red;
+		polygonsColors[colorInArray++] = fill_green;
+		polygonsColors[colorInArray++] = fill_blue;
 
-
-		printf("all verticies : \n");
-		for (int i = 0; i < vertexInArray; i++)
-		{
-			printf("x: %f, y: %f \n", polygonVerticies[i++], polygonVerticies[i]);
-		}
-		
-		printf("verticies per poly : \n");
-		for (int i = 0; i < polygonInArray + 1; i++)
-		{
-			printf("polygon : %d ,num of verticies : %d \n", i + 1, polygons[i]);
-		}
-		printf("\n\n\n");
-		
 		//reset 
 		mouserightpressed = false;
 		firstpt = false;
 		polygonInArray++;
-
 	}
+
 
 	glFlush();
 	//glutSwapBuffers();
@@ -449,26 +528,15 @@ void MainMenuSelect(int choice)
 
 void Render()
 {
-	GLfloat x1 = 1, y1 = 0, x2 = 2, y2 = 4;
-	GLfloat x3 = 1, y3 = 4, x4 = 2, y4 = 0;
 
-	glBegin(GL_LINE);
-	glVertex2d(x1, y1);
-	glVertex2d(x2, y2);
-	glEnd();
-	glBegin(GL_LINE);
-	glVertex2d(x3, y3);
-	glVertex2d(x4, y4);
-	glEnd();
-
-	if (lineIntersection(x1, y1, x2, y2, x3, y3, x4, y4) == 0) {
+	/*if (lineIntersection(x1, y1, x2, y2, x3, y3, x4, y4) == 0) {
 		printf("lines do not intersect");
 	}
 	else
 	{
 		printf("lines do intersect");
-	}
-	//Polygon();
+	}*/
+	Polygon();
 	//glClear(GL_COLOR_BUFFER_BIT);						   // my old project
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clean up the colour of the window
 														   // and the depth buffer
