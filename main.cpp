@@ -5,6 +5,9 @@
 using std::string;
 #include "gl/glut.h"   // - An interface and windows 
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 
 //colors for submenu
 #define BLACK 1
@@ -147,6 +150,55 @@ void Mouse(int button, int state, int x, int y)
 
 }
 
+bool onSegment(GLfloat px, GLfloat py, GLfloat qx , GLfloat qy, GLfloat rx, GLfloat ry )
+{
+	if (qx <= MAX(px, rx) && qx >= MIN(px, rx) &&
+		qy <= MAX(py, ry) && qy >= MIN(py, ry))
+		return true;
+
+	return false;
+}
+
+int orientation(GLfloat px, GLfloat py, GLfloat qx, GLfloat qy, GLfloat rx, GLfloat ry)
+{
+	// See https://www.geeksforgeeks.org/orientation-3-ordered-points/
+	// for details of below formula.
+	int val = (qy - py) * (rx - qx) -
+		(qx - px) * (ry - qy);
+
+	if (val == 0) return 0;  // collinear
+
+	return (val > 0) ? 1 : 2; // clock or counterclock wise
+}
+
+bool lineIntersection(GLfloat p1x, GLfloat p1y, GLfloat q1x, GLfloat q1y, GLfloat p2x, GLfloat p2y, GLfloat q2x, GLfloat q2y)
+{
+	// Find the four orientations needed for general and
+	// special cases
+	int o1 = orientation(p1x, p1y, q1x, q1y, p2x, p2y);
+	int o2 = orientation(p1x, p1y, q1x, q1y, q2x, q2y);
+	int o3 = orientation(p2x, p2y, q2x, q2y, p1x, p1y);
+	int o4 = orientation(p2x, p2y, q2x, q2y, q1x, q1y);
+
+	// General case
+	if (o1 != o2 && o3 != o4)
+		return true;
+
+	// Special Cases
+	// p1, q1 and p2 are collinear and p2 lies on segment p1q1
+	if (o1 == 0 && onSegment(p1x, p1y, p2x, p2y, q1x, q1y)) return true;
+
+	// p1, q1 and q2 are collinear and q2 lies on segment p1q1
+	if (o2 == 0 && onSegment(p1x, p1y, q2x, q2y, q1x, q1y)) return true;
+
+	// p2, q2 and p1 are collinear and p1 lies on segment p2q2
+	if (o3 == 0 && onSegment(p2x, p2y, p1x, p1y, q2x, q2y)) return true;
+
+	// p2, q2 and q1 are collinear and q1 lies on segment p2q2
+	if (o4 == 0 && onSegment(p2x, p2y, q1x, q1y, q2x, q2y)) return true;
+
+	return false; // Doesn't fall in any of the above cases
+}
 
 void Polygon() 
 {
@@ -194,6 +246,8 @@ void Polygon()
 			polygonVerticies[vertexInArray++] = pt2x;
 			polygonVerticies[vertexInArray++] = pt2y;
 
+			//checkForIntersection(pt1x, pt1y, pt2x, pt2y);
+
 			//move last point to first
 			pt1x = pt2x;
 			pt1y = pt2y;
@@ -218,6 +272,7 @@ void Polygon()
 		for (int i = 0; i < polygons[polygonInArray]; i++)
 		{
 			tmpVertArr[i] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i];
+			//debug
 			if (i == 0 || i % 2 == 0)
 				printf("tmpVertArr[%d],x : %f", i, tmpVertArr[i]);
 			else
@@ -232,7 +287,6 @@ void Polygon()
 
 		//debug
 		printf("first : %d, count : %d\n", vertexInArray - polygons[polygonInArray], polygons[polygonInArray] / 2);
-
 		printf("\nVertex in array : %d \n", vertexInArray);
 		printf("\nPolygons in array : %d\n", polygonInArray + 1);
 
@@ -395,9 +449,26 @@ void MainMenuSelect(int choice)
 
 void Render()
 {
+	GLfloat x1 = 1, y1 = 0, x2 = 2, y2 = 4;
+	GLfloat x3 = 1, y3 = 4, x4 = 2, y4 = 0;
 
+	glBegin(GL_LINE);
+	glVertex2d(x1, y1);
+	glVertex2d(x2, y2);
+	glEnd();
+	glBegin(GL_LINE);
+	glVertex2d(x3, y3);
+	glVertex2d(x4, y4);
+	glEnd();
 
-	Polygon();
+	if (lineIntersection(x1, y1, x2, y2, x3, y3, x4, y4) == 0) {
+		printf("lines do not intersect");
+	}
+	else
+	{
+		printf("lines do intersect");
+	}
+	//Polygon();
 	//glClear(GL_COLOR_BUFFER_BIT);						   // my old project
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clean up the colour of the window
 														   // and the depth buffer
