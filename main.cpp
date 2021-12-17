@@ -111,7 +111,7 @@ void clearWindow()
 // The GLUT Keyboard function
 void Keyboard(unsigned char key, int x, int y)
 {
-	switch (key)
+	switch (key) 
 	{
 	case 'C': clearScreen = true;
 		break;
