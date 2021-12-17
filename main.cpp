@@ -214,6 +214,8 @@ int getVertexPos() {
 
 void PolygonRendering() 
 {
+	std::cout << "in poly render\n\n";
+	std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
 	printf("\n\nbainw\n\n");
 
 	polygons[polygonInArray] = vertexInArray - getVertexPos();
@@ -229,6 +231,7 @@ void PolygonRendering()
 		else
 			printf("tmpVertArr[%d],y : %f \n", i, tmpVertArr[i]);
 	}
+
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(2, GL_FLOAT, 0, tmpVertArr);
@@ -254,6 +257,8 @@ void PolygonRendering()
 	}
 	printf("\n\nteleiwsa\n\n");
 	printf("\n\n\n");
+
+	std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
 }
 
 void Polygon() 
@@ -340,6 +345,9 @@ void Polygon()
 
 			if (lI == true)
 			{
+
+				std::cout << "in li contro\n\n";
+				std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
 				glClear(GL_COLOR_BUFFER_BIT);
 				int loops = polygonInArray + 2;
 				polygonInArray = 0;
@@ -353,6 +361,7 @@ void Polygon()
 					PolygonRendering();
 					
 				}
+				std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
 				
 			}
 		}
@@ -362,6 +371,8 @@ void Polygon()
 
 	if (mouserightpressed && lI == false)
 	{
+		std::cout << "in before render\n\n";
+		std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
 		glColor3f(fill_red, fill_green, fill_blue);
 		PolygonRendering();
 
