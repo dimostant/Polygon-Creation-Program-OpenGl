@@ -256,31 +256,6 @@ void PolygonRendering()
 	printf("\n\n\n");
 }
 
-void rerender() {
-
-	glClear(GL_COLOR_BUFFER_BIT);
-	int loops = polygonInArray + 2;
-	//Workaround, must be fixed later...
-	int initialpIA = polygonInArray;
-	int initialvIA = vertexInArray;
-
-	polygonInArray = 0;
-	vertexInArray = 0;
-	for (polygonInArray = 0; polygonInArray < loops; polygonInArray++)
-	{
-		std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-		vertexInArray += polygons[polygonInArray];
-		std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-		glColor3f(polygonsColors[polygonInArray * 3 + 2], polygonsColors[polygonInArray * 3 + 1], polygonsColors[polygonInArray * 3]);
-		PolygonRendering();
-
-	}
-
-	//Workaround, must be fixed later...
-	polygonInArray = initialpIA;
-	vertexInArray = initialvIA;
-}
-
 void Polygon() 
 {
 	int initialVertexPos = vertexInArray;
@@ -365,7 +340,20 @@ void Polygon()
 
 			if (lI == true)
 			{
-				rerender();
+				glClear(GL_COLOR_BUFFER_BIT);
+				int loops = polygonInArray + 2;
+				polygonInArray = 0;
+				vertexInArray = 0;
+				for (polygonInArray = 0; polygonInArray < loops; polygonInArray++)
+				{
+					std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
+					vertexInArray += polygons[polygonInArray];
+					std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
+					glColor3f(polygonsColors[polygonInArray * 3 + 2], polygonsColors[polygonInArray * 3 + 1], polygonsColors[polygonInArray * 3]);
+					PolygonRendering();
+					
+				}
+				
 			}
 		}
 
@@ -374,8 +362,6 @@ void Polygon()
 
 	if (mouserightpressed && lI == false)
 	{
-		// can write after re-render :
-		//rerender();
 		glColor3f(fill_red, fill_green, fill_blue);
 		PolygonRendering();
 
