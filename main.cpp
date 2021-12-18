@@ -28,8 +28,8 @@ using std::string;
 
 //polygon
 const int ESCKEY = 27;
-const int N = 10000;
-const int M = 10000;
+const int N = 1000;//0;
+const int M = 1000;//0;
 
 bool firstpt = false;
 bool polygonEnabled = false;
@@ -360,62 +360,44 @@ void Polygon()
 			
 			//printf("%d \n", vertexInArray);
 	
-		////	if (vertexInArray == 6)
-		////	{	
-		////		lI = polygonVerticies[vertexInArray - 6] == polygonVerticies[vertexInArray - 2] && polygonVerticies[vertexInArray - 5] == polygonVerticies[vertexInArray - 1];
-		////		std::cout << lI << "\n";
-		////	}
-		////	else
-		////	{
-		////		int i = 0;
-		////		printf("polygonVerticies[ ");
-		////		for (int i = 0; i < N; i++)
-		////		{
-		////			printf(" %f, ", polygonVerticies[i]);
-		////		}
-		////		printf("] \n ");
-		////		while (getVertexPos() <= vertexInArray - 8 - i * 2) {
-		////			lI = lineIntersection(
-	 /////*changing line :*/polygonVerticies[vertexInArray - 8 - i*2 * 100], polygonVerticies[vertexInArray - 7 - i*2] * 100, polygonVerticies[vertexInArray - 6 - i*2] * 100, polygonVerticies[vertexInArray - 5 - i*2] * 100,
-	 /////* current line :*/polygonVerticies[vertexInArray - 4] * 100, polygonVerticies[vertexInArray - 3] * 100, polygonVerticies[vertexInArray - 2] * 100, polygonVerticies[vertexInArray - 1] * 100
-		////			);
+			if (vertexInArray == 6)
+			{	
+				lI = polygonVerticies[vertexInArray - 6] == polygonVerticies[vertexInArray - 2] && polygonVerticies[vertexInArray - 5] == polygonVerticies[vertexInArray - 1];
+				std::cout << lI << "\n";
+			}
+			else
+			{
+				int i = 0;
+				printf("polygonVerticies[ ");
+				for (int i = 0; i < N; i++)
+				{
+					printf(" %f, ", polygonVerticies[i]);
+				}
+				printf("] \n ");
+				while (getCreatedPolyTotalVerts() <= vertexInArray - 8 - i * 2) {
+					lI = lineIntersection(
+	 /*changing line :*/polygonVerticies[vertexInArray - 8 - i*2 * 100], polygonVerticies[vertexInArray - 7 - i*2] * 100, polygonVerticies[vertexInArray - 6 - i*2] * 100, polygonVerticies[vertexInArray - 5 - i*2] * 100,
+	 /* current line :*/polygonVerticies[vertexInArray - 4] * 100, polygonVerticies[vertexInArray - 3] * 100, polygonVerticies[vertexInArray - 2] * 100, polygonVerticies[vertexInArray - 1] * 100
+					);
 
-		////			printf("line 1: x1 : %f, y1 : %f, x2 : %f, y2 : %f \nline 2: x3 : %f, y3 : %f, x4 : %f, y4 : %f\n\n",  
-		////				polygonVerticies[vertexInArray - 8 - i * 1], polygonVerticies[vertexInArray - 7 - i * 1], polygonVerticies[vertexInArray - 6 - i * 1], polygonVerticies[vertexInArray - 5 - i * 1],
-		////				polygonVerticies[vertexInArray - 4], polygonVerticies[vertexInArray - 3], polygonVerticies[vertexInArray - 2], polygonVerticies[vertexInArray - 1]
-		////			);
+					printf("line 1: x1 : %f, y1 : %f, x2 : %f, y2 : %f \nline 2: x3 : %f, y3 : %f, x4 : %f, y4 : %f\n\n",  
+						polygonVerticies[vertexInArray - 8 - i * 1], polygonVerticies[vertexInArray - 7 - i * 1], polygonVerticies[vertexInArray - 6 - i * 1], polygonVerticies[vertexInArray - 5 - i * 1],
+						polygonVerticies[vertexInArray - 4], polygonVerticies[vertexInArray - 3], polygonVerticies[vertexInArray - 2], polygonVerticies[vertexInArray - 1]
+					);
 
-		////			std::cout << lI << "\n";
-		////			if (lI == true)
-		////				break;
-		////			i++;
-		////		}
-		////	}
+					std::cout << lI << "\n";
+					if (lI == true)
+						break;
+					i++;
+				}
+			}
 
-		////	if (lI == true)
-		////	{
-		////		debugger();
-		////		//std::cout << "in li contro\n\n";
-		////		//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-		////		glClear(GL_COLOR_BUFFER_BIT);
-		////		int loops = polygonInArray ;
-		////		polygonInArray = 0;
-		////		vertexInArray = 0;
-		////		for (polygonInArray = 0; polygonInArray < loops; polygonInArray++)
-		////		{
-		////			//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-		////			vertexInArray += polygons[polygonInArray];
-		////			//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-		////			glColor3f(polygonsColors[polygonInArray * 3 + 2], polygonsColors[polygonInArray * 3 + 1], polygonsColors[polygonInArray * 3]);
-		////			PolygonRendering();
-		////				firstpt = true;
-	    ////                lI = false;
-		////		}
-		////		firstpt = true;
-		////		lI = false;
-		////		//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-		////		
-		////	}
+			if (lI == true)
+			{
+				rerender();
+				firstpt = true;
+				lI = false;				
+			}
 		}
 
 		mouseleftpressed = false;
