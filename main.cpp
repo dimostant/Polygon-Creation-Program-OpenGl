@@ -3,7 +3,8 @@
 #include <iostream>
 #include <string>
 using std::string;
-#include "gl/glut.h"   // - An interface and windows 
+#include "gl/glut.h"   // - An interface and windows
+#include <math.h>
 
 
 //colors for submenu
@@ -23,17 +24,6 @@ using std::string;
 #define CLEAR 12
 #define EXIT 13
 
-//polygon
-const int ESCKEY = 27;
-const int N = 10000;
-const int M = 10000;
-
-bool firstpt = false;
-bool polygonEnabled = false;
-bool clearScreen = false;
-
-const double pointsize = 1;// og 10
-
 
 // Global variables
 // Window/viewport
@@ -49,10 +39,6 @@ float fill_red = 1.0;
 float fill_green = 1.0;
 float fill_blue = 1.0;
 
-double pt1x;
-double pt1y;
-double pt2x;
-double pt2y;
 
 // Mouse
 bool mouseleftpressed = false;   // True if mouse LEFT button is down.
@@ -61,13 +47,46 @@ bool mouserightpressed = false;
 int mousex, mousey;           // Mouse x,y coords, in GLUT format (pixels from upper-left corner).
 							  // Only guaranteed to be valid if a mouse button is down.
 							  // Saved by mouse, motion
+
+
+//Keyboard
+const int ESCKEY = 27;
+
+
+//Polygon
+const int N = 10000;
+const int M = 10000;
+
 GLfloat polygonVerticies[N];
 int vertexInArray = 0; // every 2n is x cord , every 2n + 1 is y cord
+
 int polygons[M]; // every polygon number of vetrexes is stored in every different M
 int polygonInArray = 0;
 
+double pt1x, pt1y, pt2x, pt2y;
+
+bool firstpt = false;
+bool polygonEnabled = false;
+bool clearScreen = false;
+
+const double pointsize = 1;// og 10
+
+
+//Clipping window
+float xmin = 0.3, xmax = 0.7, ymin = 0.3, ymax = 0.7;
+//float xmin, xmax, ymin, ymax;
+int left = 1;	//0001
+int right = 2;	//0010
+int bottom = 4;	//0100
+int up = 8;	//1000
+
+const int K = 10000;
+GLfloat clippedPolygon[K];
+
+
 GLuint width = 600;
 GLuint height = 500;
+
 
 void printbitmap(const string msg, double x, double y)
 {
@@ -108,22 +127,6 @@ void clearWindow()
 }
 
 
-// The GLUT Keyboard function
-void Keyboard(unsigned char key, int x, int y)
-{
-	switch (key) 
-	{
-	case 'C': clearScreen = true;
-		break;
-	case ESCKEY:
-	case 'X': exit(0);
-		break;
-
-	}
-	glutPostRedisplay();
-}
-
-
 // The GLUT mouse function
 void Mouse(int button, int state, int x, int y) 
 {
@@ -145,6 +148,22 @@ void Mouse(int button, int state, int x, int y)
 		glutPostRedisplay();
 	}
 
+}
+
+
+// The GLUT Keyboard function
+void Keyboard(unsigned char key, int x, int y)
+{
+	switch (key)
+	{
+		//case 'C': clearScreen = true;
+		//	break;
+		//case ESCKEY:
+		//case 'X': exit(0);
+		//	break;
+		//
+	}
+	glutPostRedisplay();
 }
 
 
@@ -262,6 +281,102 @@ void Polygon()
 }
 
 
+void PolygonClipping() {
+
+	//printf("Enter the coordinates of bottom left corner (min) of the clipping window: (x, y) \n");
+	//scanf("%f %f", &xmin, &ymin);
+	//printf("Enter the coordinates of top right corner (max) of the clipping window: (x, y) \n");
+	//scanf("%f %f", &xmax, &ymax);
+
+	glColor3f(0.0, 0.0, 0.0);
+
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(xmin, ymin);
+	glVertex2f(xmax, ymin);
+	glVertex2f(xmax, ymax);
+	glVertex2f(xmin, ymax);
+	glEnd();
+
+	glFlush();
+
+}
+
+
+void LeftClipping()
+{
+	int i = 0, j = 0;
+
+	for (i = 0; i < N; i++) 
+	{	
+		//first case -> outside to inside -> 1 vertex & 1 edge
+		if (polygonVerticies[i] < xmin && polygonVerticies[i + 2] >= xmin)
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 2] != polygonVerticies[i])
+			{
+				//s(slope) -> (y2-y1) / (x2-x1)
+				//line through (x1,y1) and (x2,y2) (equation of line) -> ymin – y1 = m(xmin – x1)
+				//(y2-y1) / (x2-x1) * (xmin-x1) + x1
+				clippedPolygon[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (xmin - polygonVerticies[i]) + polygonVerticies[i + 1];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippedPolygon[j + 1] = polygonVerticies[i + 1];
+			}
+
+			clippedPolygon[j] = xmin;
+			j++;
+
+			//the inside points
+			clippedPolygon[j + 2] = polygonVerticies[i + 2];
+			clippedPolygon[j + 3] = polygonVerticies[i + 3];
+			j++;
+
+		}
+
+		//second case -> inside to inside
+		if (polygonVerticies[i] >= xmin && polygonVerticies[i + 2] >= xmin) 
+		{
+			clippedPolygon[j] = polygonVerticies[i + 2];		//x2
+			clippedPolygon[j + 1] = polygonVerticies[i + 3];	//y2
+			j++;
+		}
+		
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i] >= xmin && polygonVerticies[i + 2] < xmin) 
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 2] != polygonVerticies[i])
+			{
+				clippedPolygon[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (xmin - polygonVerticies[i]) + polygonVerticies[i + 1];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippedPolygon[j + 1] = polygonVerticies[i + 1];
+			}
+
+			clippedPolygon[j] = xmin;
+			j++;
+		}
+
+		//for (i = 0; i < j; i++) 
+		//{
+		//	polygonVerticies[i] = clippedPolygon[i];
+		//	polygonVerticies[j + 1] = clippedPolygon[i + 1];		
+		//}
+
+		//initialization -> because we are going to draw the previous polygon
+		//polygonVerticies[i] = clippedPolygon[0];
+		//polygonVerticies[j + 1] = clippedPolygon[1];
+		//N = j;	
+	}
+
+
+
+
+}
+
+
 void LineColorSubMenu(int choice) 
 {
 
@@ -372,10 +487,10 @@ void MainMenuSelect(int choice)
 		polygonEnabled = true;
 		Polygon();
 		break;
-		//case CLIPPING:
-		//	Polygon();
-		//  polygonEnabled = true;
-		//	break;
+	case CLIPPING:
+		//PolygonClipping();
+		LeftClipping();
+		break;
 		//case EXTRUDE:
 		//	Polygon();
 		//  polygonEnabled = true;
@@ -395,40 +510,32 @@ void MainMenuSelect(int choice)
 
 void Render()
 {
-
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	Polygon();
-	//glClear(GL_COLOR_BUFFER_BIT);						   // my old project
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clean up the colour of the window
-														   // and the depth buffer
-
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
-
-	//glFlush();
-	//glutSwapBuffers();             // All drawing commands applied to the 
-									 // hidden buffer, so now, bring forward
-									 // the hidden buffer and hide the visible one           
-
 }
 
 
 void Resize(int w, int h)
 {
-	// Set the viewport to be the entire drawing area of the window
+	//define the visible area of the window ( in pixels )
+	if (h == 0) h = 1;		//To prevent divide by 0
 	glViewport(0, 0, w, h);
 
 	// Save the window size
 	winw = w;
 	winh = h;
 
-	// Set up the projection
+	//Set up the projection & reset matrix
 	glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
+	glLoadIdentity();
+
 	gluOrtho2D(0.0, 1.0, 0.0, 1.0);
 
 	//glMatrixMode(GL_MODELVIEW);  // Always go back to model /view mode
 }
+
 
 void Idle()
 {
@@ -440,7 +547,6 @@ void Setup()  // DON'T TOUCH IT
 {
 	// White background
 	glClearColor(1.0, 1.0, 1.0, 0.0);
-
 }
 
 
@@ -477,10 +583,9 @@ int main(int argc, char* argv[])
 
 	//glutIdleFunc(Idle);
 
-
 	//manage mouse
-	glutKeyboardFunc(Keyboard);
 	glutMouseFunc(Mouse);
+	glutKeyboardFunc(Keyboard);
 	//glutMotionFunc(Motion);
 
 

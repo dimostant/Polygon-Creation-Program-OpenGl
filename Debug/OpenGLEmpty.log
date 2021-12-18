@@ -1,3 +1,4 @@
 ﻿cl : command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
   main.cpp
+C:\Users\athin\Downloads\New folder\main.cpp(165,2): warning C4060: switch statement contains no 'case' or 'default' labels
   OpenGLEmpty.vcxproj -> C:\Users\athin\Downloads\New folder\Debug\Ergasia 1.exe
