@@ -13,4 +13,7 @@
       <UniqueIdentifier>{43b0ffae-3fc9-4eaf-8072-d3c3d5c73400}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.h" />
+  </ItemGroup>
 </Project>
