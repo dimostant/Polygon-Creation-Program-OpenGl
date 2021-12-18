@@ -28,8 +28,8 @@ using std::string;
 
 //polygon
 const int ESCKEY = 27;
-const int N = 50;//10000;
-const int M = 50;//10000;
+const int N = 10000;
+const int M = 10000;
 
 bool firstpt = false;
 bool polygonEnabled = false;
@@ -110,7 +110,6 @@ void debugger() {
 
 void PolygonRendering()
 {
-	//debugger();
 	//std::cout << "in poly render\n\n";
 	//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
 	//printf("\n\nbainw\n\n");
@@ -202,22 +201,16 @@ void clearWindow()
 void rerender() 
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	debugger();
-	//std::cout << "in li contro\n\n";
-	//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
 	int loops = polygonInArray ;
 	vertexInArray = 0;
+	colorInArray = 0;
 	for (polygonInArray = 0; polygonInArray < loops; polygonInArray++)
 	{
-		//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
 		vertexInArray += polygons[polygonInArray];
-		//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-		glColor3f(polygonsColors[polygonInArray * 3 + 2], polygonsColors[polygonInArray * 3 + 1], polygonsColors[polygonInArray * 3]);
-		PolygonRendering();
-				
+		colorInArray += 3;
+		glColor3f(polygonsColors[colorInArray - 3 ], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
+		PolygonRendering();	
 	}
-	//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-	debugger();
 }
 
 // The GLUT Keyboard function
@@ -245,7 +238,6 @@ void Mouse(int button, int state, int x, int y)
 	//// Save the left button state
 	if (button == GLUT_LEFT_BUTTON) 
 	{
-		std::cout << "test";
 		mouseleftpressed = (state == GLUT_DOWN);
 		glutPostRedisplay();  // Left button has changed; redisplay
 	}
@@ -258,12 +250,6 @@ void Mouse(int button, int state, int x, int y)
 	////Save the mouse position
 	mousex = x;
 	mousey = y;
-	std::cout << "reached";
-	//if (button == GLUT_RIGHT_BUTTON) 
-	//{
-	//	mouserightpressed = (state == GLUT_UP);
-	//	glutPostRedisplay();
-	//}
 
 }
 
@@ -329,11 +315,8 @@ void Polygon()
 		clearScreen = false;
 	}
 
-	std::cout << "---\n" << polygonEnabled << " " << mouseleftpressed << " " << firstpt << "\n";
-
 	if (mouseleftpressed && polygonEnabled)
 	{
-		std::cout << "entered\n";
 		// Convert mouse position to OpenGL's coordinate system
 		double oglx = double(mousex) / winw;
 		double ogly = 1 - double(mousey) / winh;
@@ -440,9 +423,7 @@ void Polygon()
 
 	if (mouserightpressed && lI == false)
 	{
-		//std::cout << "in before render\n\n";
-		//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-		//glclear();
+
 		polygonsColors[colorInArray++] = fill_red;
 		polygonsColors[colorInArray++] = fill_green;
 		polygonsColors[colorInArray++] = fill_blue;
@@ -453,11 +434,12 @@ void Polygon()
 		mouserightpressed = false;
 		firstpt = false;
 		polygonInArray++;
+		//delete design lines
+		rerender();
 	}
 
 
 	glFlush();
-	std::cout << polygonEnabled << " " << mouseleftpressed << " " << firstpt << "\n---\n";
 	//glutSwapBuffers();
 }
 
