@@ -30,8 +30,8 @@ using std::string;
 // Global variables
 
 const int ESCKEY = 27;
-const int N = 50;//1000;//0;
-const int M = 50;//1000;//0;
+const int N = 1000;//0;
+const int M = 1000;//0;
 
 bool firstpt = false;
 bool polygonEnabled = false;
@@ -105,11 +105,13 @@ void debugger() {
 }
 
 
-void PolygonRendering()
+void PolygonRendering(int dimensions, int z)
 {
+	GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * 1);
+
 	polygons[polygonInArray] = vertexInArray - getCreatedPolyTotalVerts();
 
-	GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray]);
+	tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray]);
 
 	for (int i = 0; i < polygons[polygonInArray]; i++)
 	{
@@ -120,11 +122,40 @@ void PolygonRendering()
 		else
 			printf("tmpVertArr[%d],y : %f \n", i, tmpVertArr[i]);*/
 	}
-	glColor3f(polygonsColors[colorInArray-3], polygonsColors[colorInArray -2], polygonsColors[colorInArray -1]);
+	glColor3f(polygonsColors[colorInArray - 3], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
+
+	if (dimensions == 3) {
+		GLfloat* tmpFaceArr = (GLfloat*)malloc(sizeof(GLfloat) * 4);
+		tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray] + polygons[polygonInArray] / 2);
+
+		for (int i = 0; i < polygons[polygonInArray] + polygons[polygonInArray] / 2; i++)
+		{
+			tmpVertArr[i++] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i];
+			tmpVertArr[i++] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i];
+			tmpVertArr[i] = z;
+
+			//debug
+			/*if (i == 0 || i % 2 == 0)
+				printf("tmpVertArr[%d],x : %f", i, tmpVertArr[i]);
+			else
+				printf("tmpVertArr[%d],y : %f \n", i, tmpVertArr[i]);*/
+		}
+		glColor3f(polygonsColors[colorInArray - 3], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
+
+		for (int i = 0; i < vertexInArray - getCreatedPolyTotalVerts(); i += 4)
+		{
+			glBegin(GL_POLYGON);
+			glVertex3i(polygonVerticies[i], polygonVerticies[i + 1], 0);
+			glVertex3i(polygonVerticies[i], polygonVerticies[i + 1], z);
+			glVertex3i(polygonVerticies[i + 2], polygonVerticies[i + 3], 0);
+			glVertex3i(polygonVerticies[i + 2], polygonVerticies[i + 3], z);
+			glEnd();
+		}
+	}
 
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(2, GL_FLOAT, 0, tmpVertArr);
-	glDrawArrays(GL_POLYGON, 0, polygons[polygonInArray] / 2);
+	glVertexPointer(dimensions, GL_FLOAT, 0, tmpVertArr);
+	glDrawArrays(GL_POLYGON, 0, polygons[polygonInArray] / dimensions);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
@@ -178,7 +209,22 @@ void rerender()
 		vertexInArray += polygons[polygonInArray];
 		colorInArray += 3;
 		glColor3f(polygonsColors[colorInArray - 3 ], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
-		PolygonRendering();	
+		PolygonRendering(2, 5);	
+	}
+}
+
+void rerender3d()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	int loops = polygonInArray;
+	vertexInArray = 0;
+	colorInArray = 0;
+	for (polygonInArray = 0; polygonInArray < loops; polygonInArray++)
+	{
+		vertexInArray += polygons[polygonInArray];
+		colorInArray += 3;
+		glColor3f(polygonsColors[colorInArray - 3], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
+		PolygonRendering(3, 5);
 	}
 }
 
@@ -187,8 +233,6 @@ void Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'R': rerender();
-		break;
 	case 'C': clearScreen = true;
 		break;
 	case ESCKEY:
@@ -328,7 +372,6 @@ void Polygon()
 			if (vertexInArray == 6)
 			{	
 				lI = polygonVerticies[vertexInArray - 6] == polygonVerticies[vertexInArray - 2] && polygonVerticies[vertexInArray - 5] == polygonVerticies[vertexInArray - 1];
-				std::cout << lI << "\n";
 			}
 			else
 			{
@@ -387,7 +430,7 @@ void Polygon()
 			polygonsColors[colorInArray++] = fill_green;
 			polygonsColors[colorInArray++] = fill_blue;
 
-			PolygonRendering();
+			PolygonRendering(2, 5);
 
 			//reset 
 			mouserightpressed = false;
@@ -515,18 +558,18 @@ void MainMenuSelect(int choice)
 		break;
 		//case CLIPPING:
 		//	Polygon();
-		//  polygonEnabled = true;
+		//  polygonEnabled = false;
 		//	break;
-		//case EXTRUDE:
-		//	Polygon();
-		//  polygonEnabled = true;
-		//	break;
-	case CLEAR:
-		clearScreen = true;
-		break;
-	case EXIT:
-		exit(0);
-		break;
+		case EXTRUDE:
+			rerender3d();
+		    polygonEnabled = false;
+			break;
+		case CLEAR:
+			clearScreen = true;
+			break;
+		case EXIT:
+			exit(0);
+			break;
 	}
 
 	glutPostRedisplay();
