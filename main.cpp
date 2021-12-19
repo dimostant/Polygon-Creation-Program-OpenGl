@@ -19,17 +19,19 @@ using std::string;
 #define PURPLE 7
 #define PINK 8
 
-//options fur main menu
+//options for main menu
 #define POLYGON 9
 #define CLIPPING 10
 #define EXTRUDE 11
 #define CLEAR 12
 #define EXIT 13
 
-//polygon
+
+// Global variables
+
 const int ESCKEY = 27;
-const int N = 1000;//0;
-const int M = 1000;//0;
+const int N = 50;//1000;//0;
+const int M = 50;//1000;//0;
 
 bool firstpt = false;
 bool polygonEnabled = false;
@@ -37,8 +39,6 @@ bool clearScreen = false;
 
 const double pointsize = 1;// og 10
 
-
-// Global variables
 // Window/viewport
 int winw, winh;               // Window width & height, in pixels, saved by reshape
 
@@ -74,9 +74,7 @@ int colorInArray = 0;
 GLuint width = 600;
 GLuint height = 500;
 
-bool lI = false;//(lineIntersection(pt1x, pt1y, pt2x, pt2y))
-
-
+bool lI = false;
 
 int getCreatedPolyTotalVerts() {
 	int vertexPos = 0;
@@ -89,6 +87,7 @@ int getCreatedPolyTotalVerts() {
 void debugger() {
 
 	printf("polygonVerticies[ ");
+	//find a way to render only defined slots of array
 	for (int i = 0; i < N; i++)
 	{
 		printf(" %f, ", polygonVerticies[i]);
@@ -98,8 +97,6 @@ void debugger() {
 	printf("polygons[");
 	for (int i = 0; i < M; i++)
 	{
-
-		//if(polygons[i] != )
 		printf(" %d, ", polygons[i]);
 	}
 	printf("] \n ");
@@ -110,11 +107,6 @@ void debugger() {
 
 void PolygonRendering()
 {
-	//std::cout << "in poly render\n\n";
-	//std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";
-	//printf("\n\nbainw\n\n");
-
-
 	polygons[polygonInArray] = vertexInArray - getCreatedPolyTotalVerts();
 
 	GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray]);
@@ -134,29 +126,6 @@ void PolygonRendering()
 	glVertexPointer(2, GL_FLOAT, 0, tmpVertArr);
 	glDrawArrays(GL_POLYGON, 0, polygons[polygonInArray] / 2);
 	glDisableClientState(GL_VERTEX_ARRAY);
-
-
-	//debug
-	/*printf("first : %d, count : %d\n", vertexInArray - polygons[polygonInArray], polygons[polygonInArray] / 2);
-	printf("\nVertex in array : %d \n", vertexInArray);
-	printf("\nPolygons in array : %d\n", polygonInArray + 1);
-
-
-	printf("all verticies : \n");
-	for (int i = 0; i < vertexInArray; i++)
-	{
-		printf("x: %f, y: %f \n", polygonVerticies[i++], polygonVerticies[i]);
-	}
-
-	printf("verticies per poly : \n");
-	for (int i = 0; i < polygonInArray + 1; i++)
-	{
-		printf("polygon : %d ,num of verticies : %d \n", i + 1, polygons[i]);
-	}
-	printf("\n\nteleiwsa\n\n");
-	printf("\n\n\n");
-
-	std::cout << "vertexinArray : " << vertexInArray << "polygonInArray : " << polygonInArray << "\n";*/
 }
 
 void printbitmap(const string msg, double x, double y)
@@ -335,7 +304,6 @@ void Polygon()
 			polygonVerticies[vertexInArray++] = pt1x;
 			polygonVerticies[vertexInArray++] = pt1y;
 			firstpt = true;
-			//printf("first point : %f, %f \n", pt1x, pt1y);
 		}
 		else
 		{
@@ -355,11 +323,8 @@ void Polygon()
 			//move last point to first
 			pt1x = pt2x;
 			pt1y = pt2y;
-
-			//printf("next point : %f, %f ,\n vertexInArray : %d, polygonInArray : %d \n", pt2x, pt2y, vertexInArray, polygonInArray);
 			
-			//printf("%d \n", vertexInArray);
-	
+			//check for intersecting lines
 			if (vertexInArray == 6)
 			{	
 				lI = polygonVerticies[vertexInArray - 6] == polygonVerticies[vertexInArray - 2] && polygonVerticies[vertexInArray - 5] == polygonVerticies[vertexInArray - 1];
@@ -367,25 +332,14 @@ void Polygon()
 			}
 			else
 			{
-				int i = 0;
-				printf("polygonVerticies[ ");
-				for (int i = 0; i < N; i++)
-				{
-					printf(" %f, ", polygonVerticies[i]);
-				}
-				printf("] \n ");
+			    int i = 0;
+
 				while (getCreatedPolyTotalVerts() <= vertexInArray - 8 - i * 2) {
 					lI = lineIntersection(
-	 /*changing line :*/polygonVerticies[vertexInArray - 8 - i*2 * 100], polygonVerticies[vertexInArray - 7 - i*2] * 100, polygonVerticies[vertexInArray - 6 - i*2] * 100, polygonVerticies[vertexInArray - 5 - i*2] * 100,
+	 /*changing line :*/polygonVerticies[vertexInArray - 8 - i*2 ] * 100, polygonVerticies[vertexInArray - 7 - i*2] * 100, polygonVerticies[vertexInArray - 6 - i*2] * 100, polygonVerticies[vertexInArray - 5 - i*2] * 100,
 	 /* current line :*/polygonVerticies[vertexInArray - 4] * 100, polygonVerticies[vertexInArray - 3] * 100, polygonVerticies[vertexInArray - 2] * 100, polygonVerticies[vertexInArray - 1] * 100
 					);
 
-					printf("line 1: x1 : %f, y1 : %f, x2 : %f, y2 : %f \nline 2: x3 : %f, y3 : %f, x4 : %f, y4 : %f\n\n",  
-						polygonVerticies[vertexInArray - 8 - i * 1], polygonVerticies[vertexInArray - 7 - i * 1], polygonVerticies[vertexInArray - 6 - i * 1], polygonVerticies[vertexInArray - 5 - i * 1],
-						polygonVerticies[vertexInArray - 4], polygonVerticies[vertexInArray - 3], polygonVerticies[vertexInArray - 2], polygonVerticies[vertexInArray - 1]
-					);
-
-					std::cout << lI << "\n";
 					if (lI == true)
 						break;
 					i++;
@@ -395,7 +349,7 @@ void Polygon()
 			if (lI == true)
 			{
 				rerender();
-				firstpt = true;
+				firstpt = false;
 				lI = false;				
 			}
 		}
@@ -406,20 +360,43 @@ void Polygon()
 	if (mouserightpressed && lI == false)
 	{
 
-		polygonsColors[colorInArray++] = fill_red;
-		polygonsColors[colorInArray++] = fill_green;
-		polygonsColors[colorInArray++] = fill_blue;
+		int i = 0;
+		//can be optimized by checking lines from the begining going to the end and not the opposite
+		if (vertexInArray - getCreatedPolyTotalVerts() > 7) {
+			while (getCreatedPolyTotalVerts() + 2 <= vertexInArray - 8 - i * 2) {
+				lI = lineIntersection(
+					/*changing line :*/polygonVerticies[vertexInArray - 8 - i * 2] * 100, polygonVerticies[vertexInArray - 7 - i * 2] * 100, polygonVerticies[vertexInArray - 6 - i * 2] * 100, polygonVerticies[vertexInArray - 5 - i * 2] * 100,
+					/* current line :*/polygonVerticies[vertexInArray - 2] * 100, polygonVerticies[vertexInArray - 1] * 100, polygonVerticies[getCreatedPolyTotalVerts()] * 100, polygonVerticies[getCreatedPolyTotalVerts() + 1] * 100
+				);
 
-		PolygonRendering();
+				if (lI == true)
+					break;
+				i++;
+			}
+		}
 
-		//reset 
-		mouserightpressed = false;
-		firstpt = false;
-		polygonInArray++;
-		//delete design lines
-		rerender();
+		if (lI == true)
+		{
+			rerender();
+			firstpt = false;
+			lI = false;
+		}
+		else {
+			//check for final line intersection
+			polygonsColors[colorInArray++] = fill_red;
+			polygonsColors[colorInArray++] = fill_green;
+			polygonsColors[colorInArray++] = fill_blue;
+
+			PolygonRendering();
+
+			//reset 
+			mouserightpressed = false;
+			firstpt = false;
+			polygonInArray++;
+			//delete design lines
+			rerender();
+		}
 	}
-
 
 	glFlush();
 	//glutSwapBuffers();
@@ -560,13 +537,7 @@ void MainMenuSelect(int choice)
 void Render()
 {
 
-	/*if (lineIntersection(x1, y1, x2, y2, x3, y3, x4, y4) == 0) {
-		printf("lines do not intersect");
-	}
-	else
-	{
-		printf("lines do intersect");
-	}*/
+
 	Polygon();
 	//glClear(GL_COLOR_BUFFER_BIT);						   // my old project
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clean up the colour of the window
