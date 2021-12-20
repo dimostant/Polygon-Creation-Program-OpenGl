@@ -281,29 +281,9 @@ void Polygon()
 }
 
 
-void PolygonClipping() {
-
-	//printf("Enter the coordinates of bottom left corner (min) of the clipping window: (x, y) \n");
-	//scanf("%f %f", &xmin, &ymin);
-	//printf("Enter the coordinates of top right corner (max) of the clipping window: (x, y) \n");
-	//scanf("%f %f", &xmax, &ymax);
-
-	glColor3f(0.0, 0.0, 0.0);
-
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(xmin, ymin);
-	glVertex2f(xmax, ymin);
-	glVertex2f(xmax, ymax);
-	glVertex2f(xmin, ymax);
-	glEnd();
-
-	glFlush();
-
-}
-
-
 void LeftClipping()
 {
+
 	int i = 0, j = 0;
 
 	for (i = 0; i < N; i++) 
@@ -316,7 +296,7 @@ void LeftClipping()
 			{
 				//s(slope) -> (y2-y1) / (x2-x1)
 				//line through (x1,y1) and (x2,y2) (equation of line) -> ymin – y1 = m(xmin – x1)
-				//(y2-y1) / (x2-x1) * (xmin-x1) + x1
+				//(y2-y1) / (x2-x1) * (xmin-x1) + y1
 				clippedPolygon[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (xmin - polygonVerticies[i]) + polygonVerticies[i + 1];
 			}
 			else	//the line is completely straight, s = 0 -> y fixed
@@ -371,8 +351,248 @@ void LeftClipping()
 		//N = j;	
 	}
 
+}
 
 
+void RightClipping()
+{
+
+	int i = 0, j = 0;
+
+	for (i = 0; i < N; i++)
+	{
+		//first case -> outside to inside -> 1 vertex & 1 edge
+		if (polygonVerticies[i] > xmax && polygonVerticies[i + 2] <= xmax)
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 2] != polygonVerticies[i])
+			{
+				//s(slope) -> (y2-y1) / (x2-x1)
+				//line through (x1,y1) and (x2,y2) (equation of line) -> ymin – y1 = m(xmin – x1)
+				//(y2-y1) / (x2-x1) * (xmax-x1) + y1
+				clippedPolygon[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (xmax - polygonVerticies[i]) + polygonVerticies[i + 1];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippedPolygon[j + 1] = polygonVerticies[i + 1];
+			}
+
+			clippedPolygon[j] = xmax;
+			j++;
+
+			//the inside points
+			clippedPolygon[j + 2] = polygonVerticies[i + 2];
+			clippedPolygon[j + 3] = polygonVerticies[i + 3];
+			j++;
+
+		}
+
+		//second case -> inside to inside
+		if (polygonVerticies[i] <= xmax && polygonVerticies[i + 2] <= xmax)
+		{
+			clippedPolygon[j] = polygonVerticies[i + 2];		//x2
+			clippedPolygon[j + 1] = polygonVerticies[i + 3];	//y2
+			j++;
+		}
+
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i] <= xmax && polygonVerticies[i + 2] > xmax)
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 2] != polygonVerticies[i])
+			{
+				clippedPolygon[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (xmax - polygonVerticies[i]) + polygonVerticies[i + 1];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippedPolygon[j + 1] = polygonVerticies[i + 1];
+			}
+
+			clippedPolygon[j] = xmax;
+			j++;
+		}
+
+		//for (i = 0; i < j; i++) 
+		//{
+		//	polygonVerticies[i] = clippedPolygon[i];
+		//	polygonVerticies[j + 1] = clippedPolygon[i + 1];		
+		//}
+
+		//initialization -> because we are going to draw the previous polygon
+		//polygonVerticies[i] = clippedPolygon[0];
+		//polygonVerticies[j + 1] = clippedPolygon[1];
+		//N = j;	
+	}
+
+}
+
+
+void TopClipping()
+{
+
+	int i = 0, j = 0;
+
+	for (i = 0; i < N; i++)
+	{
+		//first case -> outside to inside -> 1 vertex & 1 edge
+		if (polygonVerticies[i + 1] > ymax && polygonVerticies[i + 3] <= ymax)
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
+			{
+				//ws pros x twra
+				//(x2-x1) / (y2-y1) * (ymax-y1) + x1
+				clippedPolygon[j] = ((polygonVerticies[i + 2] - polygonVerticies[i])) / (polygonVerticies[i + 3] - polygonVerticies[i + 1]) * (ymax - polygonVerticies[i + 1]) + polygonVerticies[i];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippedPolygon[j] = polygonVerticies[i];
+			}
+
+			clippedPolygon[j] = ymax;
+			j++;
+
+			//the inside points
+			clippedPolygon[j] = polygonVerticies[i + 2];
+			clippedPolygon[j + 1] = polygonVerticies[i + 3];
+			j++;
+
+		}
+
+		//second case -> inside to inside
+		if (polygonVerticies[i + 1] <= ymax && polygonVerticies[i + 3] <= ymax)
+		{
+			clippedPolygon[j] = polygonVerticies[i + 2];		
+			clippedPolygon[j + 1] = polygonVerticies[i + 3];	
+			j++;
+		}
+
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i + 1] <= ymax && polygonVerticies[i + 3] > ymax)
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
+			{
+				clippedPolygon[j] = ((polygonVerticies[i + 2] - polygonVerticies[i])) / (polygonVerticies[i + 3] - polygonVerticies[i + 1]) * (ymax - polygonVerticies[i + 1]) + polygonVerticies[i];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippedPolygon[j] = polygonVerticies[i];
+			}
+
+			clippedPolygon[j] = ymax;
+			j++;
+		}
+
+		//for (i = 0; i < j; i++) 
+		//{
+		//	polygonVerticies[i] = clippedPolygon[i];
+		//	polygonVerticies[j + 1] = clippedPolygon[i + 1];		
+		//}
+
+		//initialization -> because we are going to draw the previous polygon
+		//polygonVerticies[i] = clippedPolygon[0];
+		//polygonVerticies[j + 1] = clippedPolygon[1];
+		//N = j;	
+	}
+
+}
+
+
+void BottomClipping()
+{
+
+	int i = 0, j = 0;
+
+	for (i = 0; i < N; i++)
+	{
+		//first case -> outside to inside -> 1 vertex & 1 edge
+		if (polygonVerticies[i + 1] > ymin && polygonVerticies[i + 3] >= ymin)
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
+			{
+				//ws pros x twra
+				//(x2-x1) / (y2-y1) * (ymin-y1) + x1
+				clippedPolygon[j] = ((polygonVerticies[i + 2] - polygonVerticies[i])) / (polygonVerticies[i + 3] - polygonVerticies[i + 1]) * (ymin - polygonVerticies[i + 1]) + polygonVerticies[i];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippedPolygon[j] = polygonVerticies[i];
+			}
+
+			clippedPolygon[j] = ymin;
+			j++;
+
+			//the inside points
+			clippedPolygon[j] = polygonVerticies[i + 2];
+			clippedPolygon[j + 1] = polygonVerticies[i + 3];
+			j++;
+
+		}
+
+		//second case -> inside to inside
+		if (polygonVerticies[i + 1] >= ymin && polygonVerticies[i + 3] >= ymin)
+		{
+			clippedPolygon[j] = polygonVerticies[i + 2];
+			clippedPolygon[j + 1] = polygonVerticies[i + 3];
+			j++;
+		}
+
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i + 1] >= ymin && polygonVerticies[i + 3] < ymin)
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
+			{
+				clippedPolygon[j] = ((polygonVerticies[i + 2] - polygonVerticies[i])) / (polygonVerticies[i + 3] - polygonVerticies[i + 1]) * (ymin - polygonVerticies[i + 1]) + polygonVerticies[i];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippedPolygon[j] = polygonVerticies[i];
+			}
+
+			clippedPolygon[j] = ymin;
+			j++;
+		}
+
+		//for (i = 0; i < j; i++) 
+		//{
+		//	polygonVerticies[i] = clippedPolygon[i];
+		//	polygonVerticies[j + 1] = clippedPolygon[i + 1];		
+		//}
+
+		//initialization -> because we are going to draw the previous polygon
+		//polygonVerticies[i] = clippedPolygon[0];
+		//polygonVerticies[j + 1] = clippedPolygon[1];
+		//N = j;	
+	}
+
+}
+
+
+void PolygonClipping() {
+
+	//printf("Enter the coordinates of bottom left corner (min) of the clipping window: (x, y) \n");
+	//scanf("%f %f", &xmin, &ymin);
+	//printf("Enter the coordinates of top right corner (max) of the clipping window: (x, y) \n");
+	//scanf("%f %f", &xmax, &ymax);
+
+	glColor3f(0.0, 0.0, 0.0);
+
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(xmin, ymin);
+	glVertex2f(xmax, ymin);
+	glVertex2f(xmax, ymax);
+	glVertex2f(xmin, ymax);
+	glEnd();
+
+	LeftClipping();
+	RightClipping();
+	TopClipping();
+	BottomClipping();
+
+	glFlush();
 
 }
 
@@ -488,8 +708,8 @@ void MainMenuSelect(int choice)
 		Polygon();
 		break;
 	case CLIPPING:
-		//PolygonClipping();
-		LeftClipping();
+		PolygonClipping();
+		//LeftClipping();
 		break;
 		//case EXTRUDE:
 		//	Polygon();
