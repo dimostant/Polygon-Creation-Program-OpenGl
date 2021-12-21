@@ -76,6 +76,20 @@ GLuint height = 500;
 
 bool lI = false;
 
+
+GLfloat clippingPolygonVerticies[N];
+int clippingVertexInArray = 0; // every 2n is x cord , every 2n + 1 is y cord
+int clippingPolygons[M]; // every polygon number of vetrexes is stored in every different M
+int clippingPolygonInArray = 0;
+GLfloat clippingPolygonsColors[M * 3];
+int clippingColorInArray = 0;
+
+
+bool clippingEnabled = false;
+bool firstptCl = true;
+GLfloat clippingWindow[] = { 0.3, 0.3, 0.7, 0.7 };
+
+
 int getCreatedPolyTotalVerts() {
 	int vertexPos = 0;
 	for (int i = 0; i < polygonInArray; i++) {
@@ -84,7 +98,7 @@ int getCreatedPolyTotalVerts() {
 	return vertexPos;
 }
 
-void debugger() {
+void debugger(int M, int N, GLfloat* polygonVerticies, int* polygons, GLfloat* polygonsColors) {
 
 	printf("polygonVerticies[ ");
 	//find a way to render only defined slots of array
@@ -100,12 +114,20 @@ void debugger() {
 		printf(" %d, ", polygons[i]);
 	}
 	printf("] \n ");
+
+	printf("polygons[");
+	for (int i = 0; i < M*3; i++)
+	{
+		printf(" %f, ", polygonsColors[i]);
+	}
+	printf("] \n ");
 	printf("vertexInArray : %d \n", vertexInArray);
 	printf("polygonInArray : %d \n\n\n", polygonInArray);
+	printf("colorInArray: %d \n\n\n", colorInArray);
 }
 
 
-void PolygonRendering(int dimensions, int z)
+void PolygonRendering(int dimensions, int z, GLfloat* polygonVerticies, int* polygons, GLfloat* polygonsColors)
 {
 	GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * 1);
 
@@ -177,8 +199,8 @@ void clearWindow()
 
 	// Documentation
 	glColor3d(0.0, 0.0, 0.0);  // Black text
-	printbitmap("PROTOMALAKA"/*"Simple Mouse Demo"*/, 0.1, 0.9);
-	printbitmap("gamiesai"/*"Press left mouse button and move mouse"*/, 0.05, 0.55);
+	printbitmap("Grafika "/*"Simple Mouse Demo"*/, 0.1, 0.9);
+	printbitmap("Ypologistwn"/*"Press left mouse button and move mouse"*/, 0.05, 0.55);
 	printbitmap(""/*"Esc   Quit"*/, 0.15, 0.25);
 	
 	//clear written arrays
@@ -198,7 +220,7 @@ void clearWindow()
 }
 
 
-void rerender() 
+void rerender(GLfloat* polygonVerticies, int* polygons, GLfloat* polygonsColors)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	int loops = polygonInArray ;
@@ -209,13 +231,14 @@ void rerender()
 		vertexInArray += polygons[polygonInArray];
 		colorInArray += 3;
 		glColor3f(polygonsColors[colorInArray - 3 ], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
-		PolygonRendering(2, 5);	
+		PolygonRendering(2, 5, polygonVerticies, polygons, polygonsColors);
 	}
 }
 
-void rerender3d()
+void rerender3d(GLfloat* polygonVerticies, int* polygons, GLfloat* polygonsColors)
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glColor3ub(-1, +1, -5);
 	int loops = polygonInArray;
 	vertexInArray = 0;
 	colorInArray = 0;
@@ -224,7 +247,7 @@ void rerender3d()
 		vertexInArray += polygons[polygonInArray];
 		colorInArray += 3;
 		glColor3f(polygonsColors[colorInArray - 3], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
-		PolygonRendering(3, 5);
+		PolygonRendering(3, 5, polygonVerticies, polygons, polygonsColors);
 	}
 }
 
@@ -316,6 +339,294 @@ bool lineIntersection(GLfloat p1x, GLfloat p1y, GLfloat q1x, GLfloat q1y, GLfloa
 	return false; // Doesn't fall in any of the above cases
 }
 
+void LeftClipping(int totalverticies)
+{
+
+	int i = 0, j = 0;
+
+	for (i = 0; i < N; i++)
+	{
+		//first case -> outside to inside -> 1 vertex & 1 edge
+		if (polygonVerticies[i + totalverticies] < clippingWindow[0] && polygonVerticies[i + +totalverticies] >= clippingWindow[0])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 2 + totalverticies] != polygonVerticies[i + totalverticies])
+			{
+				//s(slope) -> (y2-y1) / (x2-x1)
+				//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
+		//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
+				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3 + totalverticies] - polygonVerticies[i + 1 + totalverticies])) / (polygonVerticies[i + 2 + totalverticies] - polygonVerticies[i + totalverticies]) * (clippingWindow[0] - polygonVerticies[i + totalverticies]) + polygonVerticies[i + 1 + totalverticies];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1 + totalverticies];
+			}
+			clippingPolygonVerticies[j] = clippingWindow[0];
+			j++;
+			//the inside points
+			clippingPolygonVerticies[j + 2] = polygonVerticies[i + 2 + totalverticies];
+			clippingPolygonVerticies[j + 3] = polygonVerticies[i + 3 + totalverticies];
+			j++;
+		}
+		//second case -> inside to inside
+		if (polygonVerticies[i + totalverticies] >= clippingWindow[0] && polygonVerticies[i + 2 + totalverticies] >= clippingWindow[0])
+		{
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2 + totalverticies];		//x2
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3 + totalverticies];	//y2
+			j++;
+		}
+
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i + totalverticies] >= clippingWindow[0] && polygonVerticies[i + 2 + totalverticies] < clippingWindow[0])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 2 + totalverticies] != polygonVerticies[i + totalverticies])
+			{
+				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3 + totalverticies] - polygonVerticies[i + 1 + totalverticies])) / (polygonVerticies[i + 2 + totalverticies] - polygonVerticies[i + totalverticies]) * (clippingWindow[0] - polygonVerticies[i + totalverticies]) + polygonVerticies[i + 1 + totalverticies];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1 + totalverticies];
+			}
+			clippingPolygonVerticies[j] = clippingWindow[0];
+			j++;
+		}
+		//for (i = 0; i < j; i++) 
+		//{
+		//	polygonVerticies[i] = clippingPolygonVerticies[i];
+		//	polygonVerticies[j + 1] = clippingPolygonVerticies[i + 1];		
+		//}
+		//initialization -> because we are going to draw the previous polygon
+		//polygonVerticies[i] = clippingPolygonVerticies[0];
+		//polygonVerticies[j + 1] = clippingPolygonVerticies[1];
+		//N = j;	
+	}
+}
+
+void RightClipping(int totalverticies)
+{
+
+	int i = 0, j = 0;
+
+	for (i = 0; i < N; i++)
+	{
+		//first case -> outside to inside -> 1 vertex & 1 edge
+		if (polygonVerticies[i + totalverticies] > clippingWindow[2] && polygonVerticies[i + 2 + totalverticies] <= clippingWindow[2])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 2 + totalverticies] != polygonVerticies[i + totalverticies])
+			{
+				//s(slope) -> (y2-y1) / (x2-x1)
+				//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
+				//(y2-y1) / (x2-x1) * (clippingWindow[2]-x1) + y1
+				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3 + totalverticies] - polygonVerticies[i + 1 + totalverticies])) / (polygonVerticies[i + 2 + totalverticies] - polygonVerticies[i + totalverticies]) * (clippingWindow[2] - polygonVerticies[i + totalverticies]) + polygonVerticies[i + 1 + totalverticies];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1 + totalverticies];
+			}
+
+			clippingPolygonVerticies[j] = clippingWindow[2];
+			j++;
+
+			//the inside points
+			clippingPolygonVerticies[j + 2] = polygonVerticies[i + 2 + totalverticies];
+			clippingPolygonVerticies[j + 3] = polygonVerticies[i + 3 + totalverticies];
+			j++;
+
+		}
+
+		//second case -> inside to inside
+		if (polygonVerticies[i] <= clippingWindow[2] && polygonVerticies[i + 2] <= clippingWindow[2])
+		{
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2 + totalverticies];		//x2
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3 + totalverticies];	//y2
+			j++;
+		}
+
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i + totalverticies] <= clippingWindow[2] && polygonVerticies[i + 2 + totalverticies] > clippingWindow[2])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 2] != polygonVerticies[i + totalverticies])
+			{
+				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3 + totalverticies] - polygonVerticies[i + 1 + totalverticies])) / (polygonVerticies[i + 2 + totalverticies] - polygonVerticies[i + totalverticies]) * (clippingWindow[2] - polygonVerticies[i + totalverticies]) + polygonVerticies[i + 1 + totalverticies];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1 + totalverticies];
+			}
+
+			clippingPolygonVerticies[j] = clippingWindow[2];
+			j++;
+		}
+
+		//for (i = 0; i < j; i++) 
+		//{
+		//	polygonVerticies[i] = clippingPolygonVerticies[i];
+		//	polygonVerticies[j + 1] = clippingPolygonVerticies[i + 1];		
+		//}
+
+		//initialization -> because we are going to draw the previous polygon
+		//polygonVerticies[i] = clippingPolygonVerticies[0];
+		//polygonVerticies[j + 1] = clippingPolygonVerticies[1];
+		//N = j;	
+	}
+
+}
+
+void TopClipping(int totalverticies)
+{
+
+	int i = 0, j = 0;
+
+	for (i = 0; i < N; i++)
+	{
+		//first case -> outside to inside -> 1 vertex & 1 edge
+		if (polygonVerticies[i + 1 + totalverticies] > clippingWindow[1] && polygonVerticies[i + 3 + totalverticies] <= clippingWindow[1])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3 + totalverticies] != polygonVerticies[i + 1 + totalverticies])
+			{
+				//ws pros x twra
+				//(x2-x1) / (y2-y1) * (clippingWindow[1]-y1) + x1
+				clippingPolygonVerticies[j] = ((polygonVerticies[i + 2 + totalverticies] - polygonVerticies[i + totalverticies])) / (polygonVerticies[i + 3 + totalverticies] - polygonVerticies[i + 1 + totalverticies]) * (clippingWindow[1] - polygonVerticies[i + 1 + totalverticies]) + polygonVerticies[i + totalverticies];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j] = polygonVerticies[i + totalverticies];
+			}
+
+			clippingPolygonVerticies[j] = clippingWindow[1];
+			j++;
+
+			//the inside points
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2 + totalverticies];
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3 + totalverticies];
+			j++;
+
+		}
+
+		//second case -> inside to inside
+		if (polygonVerticies[i + 1 + totalverticies] <= clippingWindow[1] && polygonVerticies[i + 3 + totalverticies] <= clippingWindow[1])
+		{
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2 + totalverticies];
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3 + totalverticies];
+			j++;
+		}
+
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i + 1 + totalverticies] <= clippingWindow[1] && polygonVerticies[i + 3 + totalverticies] > clippingWindow[1])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3 + totalverticies] != polygonVerticies[i + 1 + totalverticies])
+			{
+				clippingPolygonVerticies[j] = ((polygonVerticies[i + 2 + totalverticies] - polygonVerticies[i + totalverticies])) / (polygonVerticies[i + 3 + totalverticies] - polygonVerticies[i + 1 + totalverticies]) * (clippingWindow[1] - polygonVerticies[i + 1 + totalverticies]) + polygonVerticies[i + totalverticies];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j] = polygonVerticies[i + totalverticies];
+			}
+
+			clippingPolygonVerticies[j] = clippingWindow[1];
+			j++;
+		}
+
+		//for (i = 0; i < j; i++) 
+		//{
+		//	polygonVerticies[i] = clippingPolygonVerticies[i];
+		//	polygonVerticies[j + 1] = clippingPolygonVerticies[i + 1];		
+		//}
+
+		//initialization -> because we are going to draw the previous polygon
+		//polygonVerticies[i] = clippingPolygonVerticies[0];
+		//polygonVerticies[j + 1] = clippingPolygonVerticies[1];
+		//N = j;	
+	}
+
+}
+
+
+void BottomClipping(int totalverticies)
+{
+
+	int i = 0, j = 0;
+
+	for (i = 0; i < N; i++)
+	{
+		//first case -> outside to inside -> 1 vertex & 1 edge
+		if (polygonVerticies[i + 1 + totalverticies] > clippingWindow[3] && polygonVerticies[i + 3 + totalverticies] >= clippingWindow[3])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3 + totalverticies] != polygonVerticies[i + 1 + totalverticies])
+			{
+				//ws pros x twra
+				//(x2-x1) / (y2-y1) * (clippingWindow[3]-y1) + x1
+				clippingPolygonVerticies[j] = ((polygonVerticies[i + 2 + totalverticies] - polygonVerticies[i + totalverticies])) / (polygonVerticies[i + 3 + totalverticies] - polygonVerticies[i + 1 + totalverticies]) * (clippingWindow[3] - polygonVerticies[i + 1 + totalverticies]) + polygonVerticies[i + totalverticies];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j] = polygonVerticies[i + totalverticies];
+			}
+
+			clippingPolygonVerticies[j] = clippingWindow[3];
+			j++;
+
+			//the inside points
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2 + totalverticies];
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3 + totalverticies];
+			j++;
+
+		}
+
+		//second case -> inside to inside
+		if (polygonVerticies[i + 1 + totalverticies] >= clippingWindow[3] && polygonVerticies[i + 3 + totalverticies] >= clippingWindow[3])
+		{
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2 + totalverticies];
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3 + totalverticies];
+			j++;
+		}
+
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i + 1] >= clippingWindow[3] && polygonVerticies[i + 3 + totalverticies] < clippingWindow[3])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
+			{
+				clippingPolygonVerticies[j] = ((polygonVerticies[i + 2 + totalverticies] - polygonVerticies[i + totalverticies])) / (polygonVerticies[i + 3 + totalverticies] - polygonVerticies[i + 1 + totalverticies]) * (clippingWindow[3] - polygonVerticies[i + 1 + totalverticies]) + polygonVerticies[i + totalverticies];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j] = polygonVerticies[i + totalverticies];
+			}
+
+			clippingPolygonVerticies[j] = clippingWindow[3];
+			j++;
+		}
+
+		//for (i = 0; i < j; i++) 
+		//{
+		//	polygonVerticies[i] = clippingPolygonVerticies[i];
+		//	polygonVerticies[j + 1] = clippingPolygonVerticies[i + 1];		
+		//}
+
+		//initialization -> because we are going to draw the previous polygon
+		//polygonVerticies[i] = clippingPolygonVerticies[0];
+		//polygonVerticies[j + 1] = clippingPolygonVerticies[1];
+		//N = j;	
+	}
+
+}
+
+void PolygonClipping()
+{
+	LeftClipping(0);
+	debugger(20, 20, polygonVerticies, polygons, polygonsColors);
+	debugger(20, 20, clippingPolygonVerticies, clippingPolygons, clippingPolygonsColors);
+	rerender(clippingPolygonVerticies, clippingPolygons, clippingPolygonsColors);
+	glFlush();
+
+}
 
 void Polygon() 
 {
@@ -326,6 +637,67 @@ void Polygon()
 		clearWindow();
 		firstpt = false;
 		clearScreen = false;
+	}
+
+	if (mouseleftpressed && clippingEnabled) {
+		// Convert mouse position to OpenGL's coordinate system
+		double oglx = double(mousex) / winw;
+		double ogly = 1 - double(mousey) / winh;
+
+		glColor3f(line_red, line_green, line_blue);
+		glPointSize(pointsize);
+		
+		if (firstptCl) {
+			rerender(polygonVerticies, polygons, polygonsColors);
+			glBegin(GL_POINTS);
+			glVertex2d(oglx, ogly);
+			glEnd();
+			pt1x = oglx;
+			pt1y = ogly;
+			clippingWindow[0] = pt1x;
+			clippingWindow[1] = pt1y;
+			firstptCl = false;
+		}
+
+		else {
+			glBegin(GL_POINTS);
+			glVertex2d(oglx, ogly);
+			glEnd();
+			pt1x = oglx;
+			pt1y = ogly;
+			clippingWindow[2] = pt1x;
+			clippingWindow[3] = pt1y;
+
+			GLfloat temp;
+			
+			//put points in the appropriate positions
+			if (MAX(clippingWindow[0], clippingWindow[2]) == clippingWindow[0])
+			{
+				temp = clippingWindow[2];
+				clippingWindow[2] = clippingWindow[0];
+				clippingWindow[0] = temp;
+			}
+			if (MAX(clippingWindow[1], clippingWindow[3]) == clippingWindow[3])
+			{
+				temp = clippingWindow[1];
+				clippingWindow[1] = clippingWindow[3];
+				clippingWindow[3] = temp;
+			}
+
+			glColor3f(0.0, 0.0, 0.0);
+			glPointSize(pointsize);
+
+			glBegin(GL_LINE_LOOP);
+			glVertex2f(clippingWindow[0], clippingWindow[1]);
+			glVertex2f(clippingWindow[2], clippingWindow[1]);
+			glVertex2f(clippingWindow[2], clippingWindow[3]);
+			glVertex2f(clippingWindow[0], clippingWindow[3]);
+			glEnd(); 
+
+			PolygonClipping();
+
+			firstptCl = true;
+		}
 	}
 
 	if (mouseleftpressed && polygonEnabled)
@@ -379,8 +751,11 @@ void Polygon()
 
 				while (getCreatedPolyTotalVerts() <= vertexInArray - 8 - i * 2) {
 					lI = lineIntersection(
-	 /*changing line :*/polygonVerticies[vertexInArray - 8 - i*2 ] * 100, polygonVerticies[vertexInArray - 7 - i*2] * 100, polygonVerticies[vertexInArray - 6 - i*2] * 100, polygonVerticies[vertexInArray - 5 - i*2] * 100,
-	 /* current line :*/polygonVerticies[vertexInArray - 4] * 100, polygonVerticies[vertexInArray - 3] * 100, polygonVerticies[vertexInArray - 2] * 100, polygonVerticies[vertexInArray - 1] * 100
+	 /*changing line :*/polygonVerticies[vertexInArray - 8 - i*2 ] * 100, polygonVerticies[vertexInArray - 7 - i*2] * 100,
+						polygonVerticies[vertexInArray - 6 - i*2] * 100, polygonVerticies[vertexInArray - 5 - i*2] * 100,
+						//---------------------------------------------------------------------------------------------------//
+	 /* current line :*/polygonVerticies[vertexInArray - 4] * 100, polygonVerticies[vertexInArray - 3] * 100,
+						polygonVerticies[vertexInArray - 2] * 100, polygonVerticies[vertexInArray - 1] * 100
 					);
 
 					if (lI == true)
@@ -391,7 +766,7 @@ void Polygon()
 
 			if (lI == true)
 			{
-				rerender();
+				rerender(polygonVerticies, polygons, polygonsColors);
 				firstpt = false;
 				lI = false;				
 			}
@@ -408,8 +783,11 @@ void Polygon()
 		if (vertexInArray - getCreatedPolyTotalVerts() > 7) {
 			while (getCreatedPolyTotalVerts() + 2 <= vertexInArray - 8 - i * 2) {
 				lI = lineIntersection(
-					/*changing line :*/polygonVerticies[vertexInArray - 8 - i * 2] * 100, polygonVerticies[vertexInArray - 7 - i * 2] * 100, polygonVerticies[vertexInArray - 6 - i * 2] * 100, polygonVerticies[vertexInArray - 5 - i * 2] * 100,
-					/* current line :*/polygonVerticies[vertexInArray - 2] * 100, polygonVerticies[vertexInArray - 1] * 100, polygonVerticies[getCreatedPolyTotalVerts()] * 100, polygonVerticies[getCreatedPolyTotalVerts() + 1] * 100
+ /*changing line :*/polygonVerticies[vertexInArray - 8 - i * 2] * 100, polygonVerticies[vertexInArray - 7 - i * 2] * 100,
+					polygonVerticies[vertexInArray - 6 - i * 2] * 100, polygonVerticies[vertexInArray - 5 - i * 2] * 100,
+					//------------------------------------------------------------------------------------------------------//
+ /* current line :*/polygonVerticies[vertexInArray - 2] * 100, polygonVerticies[vertexInArray - 1] * 100,
+					polygonVerticies[getCreatedPolyTotalVerts()] * 100, polygonVerticies[getCreatedPolyTotalVerts() + 1] * 100
 				);
 
 				if (lI == true)
@@ -420,7 +798,7 @@ void Polygon()
 
 		if (lI == true)
 		{
-			rerender();
+			rerender(polygonVerticies, polygons, polygonsColors);
 			firstpt = false;
 			lI = false;
 		}
@@ -430,14 +808,14 @@ void Polygon()
 			polygonsColors[colorInArray++] = fill_green;
 			polygonsColors[colorInArray++] = fill_blue;
 
-			PolygonRendering(2, 5);
+			PolygonRendering(2, 5, polygonVerticies, polygons, polygonsColors);
 
 			//reset 
 			mouserightpressed = false;
 			firstpt = false;
 			polygonInArray++;
 			//delete design lines
-			rerender();
+			rerender(polygonVerticies, polygons, polygonsColors);
 		}
 	}
 
@@ -552,16 +930,17 @@ void MainMenuSelect(int choice)
 {
 
 	switch (choice) {
-	case POLYGON:
-		polygonEnabled = true;
-		Polygon();
-		break;
-		//case CLIPPING:
-		//	Polygon();
-		//  polygonEnabled = false;
-		//	break;
+		case POLYGON:
+			polygonEnabled = true;
+			clippingEnabled = false;
+			break;
+		case CLIPPING:
+			clippingEnabled = true;
+		    polygonEnabled = false;
+			break;
 		case EXTRUDE:
-			rerender3d();
+			rerender3d(polygonVerticies, polygons, polygonsColors);
+			clippingEnabled = false;
 		    polygonEnabled = false;
 			break;
 		case CLEAR:
@@ -599,19 +978,18 @@ void Render()
 
 void Resize(int w, int h)
 {
-	// Set the viewport to be the entire drawing area of the window
+	//define the visible area of the window ( in pixels )
+	if (h == 0) h = 1;		//To prevent divide by 0
 	glViewport(0, 0, w, h);
-
 	// Save the window size
 	winw = w;
 	winh = h;
-
-	// Set up the projection
+	//Set up the projection & reset matrix
 	glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
+	glLoadIdentity();
 	gluOrtho2D(0.0, 1.0, 0.0, 1.0);
-
 	//glMatrixMode(GL_MODELVIEW);  // Always go back to model /view mode
+
 }
 
 void Idle()
