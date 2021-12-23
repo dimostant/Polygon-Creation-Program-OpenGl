@@ -629,7 +629,7 @@ void clippingRerender(GLfloat* polygonVerticies, int* polygons, GLfloat* polygon
 //
 //}
 //
-void LeftClipping(GLfloat* polygonVerticies, GLfloat* outputVertArray, int* polygonsarr, int* polygonsoutarr, int polygon, int* vertexInoutArray, int previousPolygonsVers)
+void LeftClipping(GLfloat polygonVerticies[], GLfloat* outputVertArray, int* polygonsarr, int* polygonsoutarr, int polygon, int* vertexInoutArray, int previousPolygonsVers)
 {
 //
 //	//GLfloat polygonVerticies[] = { 0.1, 0.7, 0.5, 1, 0.5, 0.2 , 0, 0}, clippedPolygon[10];
@@ -638,101 +638,28 @@ void LeftClipping(GLfloat* polygonVerticies, GLfloat* outputVertArray, int* poly
 //	//clippingPolygonsColors[colorInArray++] = 0.3;
 //	//clippingPolygonsColors[colorInArray++] = 0.7;
 //	//clippingPolygonsColors[colorInArray++] = 0.2;
-//
-//	//polygonVerticies[polygonsarr[polygon] - 2] = polygonVerticies[0];
-//	//polygonVerticies[polygonsarr[polygon] - 1] = polygonVerticies[1];
-//	//
-//	//for (int i = 0; i < 8; i++) {
-//	//	clippedPolygon[i] = 0;
-//	//}
-//	//
-//	//for (int i = 0; i < polygonsarr[polygon]; i += 2)
-//	//{
-//	//	if (polygonVerticies[i + previousPolygonsVers] < clippingWindow[0] && polygonVerticies[i + previousPolygonsVers + 2] >= clippingWindow[0])
-//	//	{
-//
-//	//		//x2 - x1 != 0
-//	//		if (polygonVerticies[i + 3 + previousPolygonsVers] != polygonVerticies[i + 1 + previousPolygonsVers])
-//	//		{
-//	//			//s(slope) -> (y2-y1) / (x2-x1)
-//	//			//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
-//	//			//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
-//	//			clippedPolygon[j + 1] = ((polygonVerticies[i + 3 + previousPolygonsVers] - polygonVerticies[i + 1 + previousPolygonsVers])) / (polygonVerticies[i + 2 + previousPolygonsVers] - polygonVerticies[i + previousPolygonsVers]) * (clippingWindow[0] - polygonVerticies[i + previousPolygonsVers]) + polygonVerticies[i + 1 + previousPolygonsVers];
-//	//		}
-//	//		else	//the line is completely straight, s = 0 -> y fixed
-//	//		{
-//	//			clippedPolygon[j + 1] = polygonVerticies[i + 1 + previousPolygonsVers];
-//	//		}
-//	//		clippedPolygon[j] = clippingWindow[0];
-//
-//	//		//the inside points
-//	//		clippedPolygon[j + 2] = polygonVerticies[i + 2 + previousPolygonsVers];
-//	//		clippedPolygon[j + 3] = polygonVerticies[i + 3 + previousPolygonsVers];
-//	//		j += 4;
-//	//	}
-//	//	//second case -> inside to inside
-//	//	if (polygonVerticies[i + previousPolygonsVers] >= clippingWindow[0] && polygonVerticies[i + 2 + previousPolygonsVers] >= clippingWindow[0])
-//	//	{
-//
-//	//		clippedPolygon[j] = polygonVerticies[i + 2 + previousPolygonsVers];		//x2
-//	//		clippedPolygon[j + 1] = polygonVerticies[i + 3 + previousPolygonsVers];	//y2
-//	//		j += 2;
-//	//	}
-//
-//	//	//third case -> inside to outside -> 1 vertex
-//	//	if (polygonVerticies[i + previousPolygonsVers] >= clippingWindow[0] && polygonVerticies[i + 2 + previousPolygonsVers] < clippingWindow[0])
-//	//	{	
-//	//		//x2 - x1 != 0
-//	//		if (polygonVerticies[i + 3 + previousPolygonsVers] != polygonVerticies[i + 1 +previousPolygonsVers])
-//	//		{
-//	//			clippedPolygon[j + 1] = ((polygonVerticies[i + 3 + previousPolygonsVers] - polygonVerticies[i + 1 + previousPolygonsVers])) / (polygonVerticies[i + 2 + previousPolygonsVers] - polygonVerticies[i + previousPolygonsVers]) * (clippingWindow[0] - polygonVerticies[i + previousPolygonsVers]) + polygonVerticies[i + 1 + previousPolygonsVers];
-//	//			std::cout << "\nbruh 1" << clippedPolygon[j + 1];
-//	//			std::cout << "\ni : " << i;
-//	//			std::cout << "j :" << j;
-//	//			std::cout <<" \n" << clippedPolygon[j + 1];
-//
-//	//		}
-//	//		else	//the line is completely straight, s = 0 -> y fixed
-//	//		{
-//	//			clippedPolygon[j + 1] = polygonVerticies[i + 1 + previousPolygonsVers];
-//	//			std::cout << "\nbruh 2";
-//	//			std::cout << "\ni : " << i;
-//	//			std::cout << "j :" << j;
-//	//			std::cout << " \n" << clippedPolygon[j + 1];
-//
-//	//		}
-//	//		clippedPolygon[j] = clippingWindow[0];
-//	//		j+=2;
-//	//	}
-//	//}
-//
-//	//clippingPolygons[0] = 10;
-//	////PolygonRendering(2, 3, polygonVerticies, clippingPolygons, polygonsColors, 7, polygon, colorInArray );
-//	//PolygonRendering(2, 3, clippedPolygon, clippingPolygons, polygonsColors, j, polygon, colorInArray);
-//
-//	//for (int i = 0; i < 8 ; i++)
-//	//	std::cout << "\nclippingPolygonVerticies :" << clippedPolygon[i] << "\n";
-//	//
-//
-//
-//	//-----------------------------------------------------------------------------------------------------------------------------------------
-	int j = 0;
+// 
+ 	int j = 0;
 	GLfloat clippingPolygonVerticies[N];
 
 	polygonVerticies[polygonsarr[polygon] - 2] = polygonVerticies[0];
 	polygonVerticies[polygonsarr[polygon] - 1] = polygonVerticies[1];
-
-	for (int i = 0; i < polygonsarr[polygon]; i+=2)
+	
+	for (int i = 0; i < polygonsarr[polygon]; i++) {
+		clippingPolygonVerticies[i] = 0;
+	}
+	
+	for (int i = 0; i < polygonsarr[polygon]; i += 2)
 	{
-		//first case -> outside to inside -> 1 vertex & 1 edge
-		if (polygonVerticies[i + previousPolygonsVers] < clippingWindow[0] && polygonVerticies[i + 2 +previousPolygonsVers] >= clippingWindow[0])
+		if (polygonVerticies[i + previousPolygonsVers] < clippingWindow[0] && polygonVerticies[i + previousPolygonsVers + 2] >= clippingWindow[0])
 		{
+
 			//x2 - x1 != 0
 			if (polygonVerticies[i + 3 + previousPolygonsVers] != polygonVerticies[i + 1 + previousPolygonsVers])
 			{
 				//s(slope) -> (y2-y1) / (x2-x1)
 				//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
-		//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
+				//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
 				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3 + previousPolygonsVers] - polygonVerticies[i + 1 + previousPolygonsVers])) / (polygonVerticies[i + 2 + previousPolygonsVers] - polygonVerticies[i + previousPolygonsVers]) * (clippingWindow[0] - polygonVerticies[i + previousPolygonsVers]) + polygonVerticies[i + 1 + previousPolygonsVers];
 			}
 			else	//the line is completely straight, s = 0 -> y fixed
@@ -740,16 +667,16 @@ void LeftClipping(GLfloat* polygonVerticies, GLfloat* outputVertArray, int* poly
 				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1 + previousPolygonsVers];
 			}
 			clippingPolygonVerticies[j] = clippingWindow[0];
+
 			//the inside points
 			clippingPolygonVerticies[j + 2] = polygonVerticies[i + 2 + previousPolygonsVers];
 			clippingPolygonVerticies[j + 3] = polygonVerticies[i + 3 + previousPolygonsVers];
 			j += 4;
 		}
-
-
 		//second case -> inside to inside
 		if (polygonVerticies[i + previousPolygonsVers] >= clippingWindow[0] && polygonVerticies[i + 2 + previousPolygonsVers] >= clippingWindow[0])
 		{
+
 			clippingPolygonVerticies[j] = polygonVerticies[i + 2 + previousPolygonsVers];		//x2
 			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3 + previousPolygonsVers];	//y2
 			j += 2;
@@ -759,19 +686,95 @@ void LeftClipping(GLfloat* polygonVerticies, GLfloat* outputVertArray, int* poly
 		if (polygonVerticies[i + previousPolygonsVers] >= clippingWindow[0] && polygonVerticies[i + 2 + previousPolygonsVers] < clippingWindow[0])
 		{	
 			//x2 - x1 != 0
-			if (polygonVerticies[i + 3 + previousPolygonsVers] != polygonVerticies[i + 1 + previousPolygonsVers])
+			if (polygonVerticies[i + 3 + previousPolygonsVers] != polygonVerticies[i + 1 +previousPolygonsVers])
 			{
 				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3 + previousPolygonsVers] - polygonVerticies[i + 1 + previousPolygonsVers])) / (polygonVerticies[i + 2 + previousPolygonsVers] - polygonVerticies[i + previousPolygonsVers]) * (clippingWindow[0] - polygonVerticies[i + previousPolygonsVers]) + polygonVerticies[i + 1 + previousPolygonsVers];
+				std::cout << "\nbruh 1" << clippingPolygonVerticies[j + 1];
+				std::cout << "\ni : " << i;
+				std::cout << "j :" << j;
+				std::cout <<" \n" << clippingPolygonVerticies[j + 1];
+
 			}
 			else	//the line is completely straight, s = 0 -> y fixed
 			{
 				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1 + previousPolygonsVers];
+				std::cout << "\nbruh 2";
+				std::cout << "\ni : " << i;
+				std::cout << "j :" << j;
+				std::cout << " \n" << clippingPolygonVerticies[j + 1];
+
 			}
 			clippingPolygonVerticies[j] = clippingWindow[0];
-			j += 2;
+			j+=2;
 		}
-	
 	}
+
+	//clippingPolygons[0] = 10;
+	////PolygonRendering(2, 3, polygonVerticies, clippingPolygons, polygonsColors, 7, polygon, colorInArray );
+	//PolygonRendering(2, 3, clippedPolygon, clippingPolygons, polygonsColors, j, polygon, colorInArray);
+
+	//for (int i = 0; i < 8 ; i++)
+	//	std::cout << "\nclippingPolygonVerticies :" << clippedPolygon[i] << "\n";
+	
+
+
+//	//-----------------------------------------------------------------------------------------------------------------------------------------
+	//int j = 0;
+	//GLfloat clippingPolygonVerticies[N];
+
+	//polygonVerticies[polygonsarr[polygon] - 2] = polygonVerticies[0];
+	//polygonVerticies[polygonsarr[polygon] - 1] = polygonVerticies[1];
+
+	//for (int i = 0; i < polygonsarr[polygon]; i+=2)
+	//{
+	//	//first case -> outside to inside -> 1 vertex & 1 edge
+	//	if (polygonVerticies[i + previousPolygonsVers] < clippingWindow[0] && polygonVerticies[i + 2 +previousPolygonsVers] >= clippingWindow[0])
+	//	{
+	//		//x2 - x1 != 0
+	//		if (polygonVerticies[i + 3 + previousPolygonsVers] != polygonVerticies[i + 1 + previousPolygonsVers])
+	//		{
+	//			//s(slope) -> (y2-y1) / (x2-x1)
+	//			//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
+	//	//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
+	//			clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3 + previousPolygonsVers] - polygonVerticies[i + 1 + previousPolygonsVers])) / (polygonVerticies[i + 2 + previousPolygonsVers] - polygonVerticies[i + previousPolygonsVers]) * (clippingWindow[0] - polygonVerticies[i + previousPolygonsVers]) + polygonVerticies[i + 1 + previousPolygonsVers];
+	//		}
+	//		else	//the line is completely straight, s = 0 -> y fixed
+	//		{
+	//			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1 + previousPolygonsVers];
+	//		}
+	//		clippingPolygonVerticies[j] = clippingWindow[0];
+	//		//the inside points
+	//		clippingPolygonVerticies[j + 2] = polygonVerticies[i + 2 + previousPolygonsVers];
+	//		clippingPolygonVerticies[j + 3] = polygonVerticies[i + 3 + previousPolygonsVers];
+	//		j += 4;
+	//	}
+
+
+	//	//second case -> inside to inside
+	//	if (polygonVerticies[i + previousPolygonsVers] >= clippingWindow[0] && polygonVerticies[i + 2 + previousPolygonsVers] >= clippingWindow[0])
+	//	{
+	//		clippingPolygonVerticies[j] = polygonVerticies[i + 2 + previousPolygonsVers];		//x2
+	//		clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3 + previousPolygonsVers];	//y2
+	//		j += 2;
+	//	}
+
+	//	//third case -> inside to outside -> 1 vertex
+	//	if (polygonVerticies[i + previousPolygonsVers] >= clippingWindow[0] && polygonVerticies[i + 2 + previousPolygonsVers] < clippingWindow[0])
+	//	{	
+	//		//x2 - x1 != 0
+	//		if (polygonVerticies[i + 3 + previousPolygonsVers] != polygonVerticies[i + 1 + previousPolygonsVers])
+	//		{
+	//			clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3 + previousPolygonsVers] - polygonVerticies[i + 1 + previousPolygonsVers])) / (polygonVerticies[i + 2 + previousPolygonsVers] - polygonVerticies[i + previousPolygonsVers]) * (clippingWindow[0] - polygonVerticies[i + previousPolygonsVers]) + polygonVerticies[i + 1 + previousPolygonsVers];
+	//		}
+	//		else	//the line is completely straight, s = 0 -> y fixed
+	//		{
+	//			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1 + previousPolygonsVers];
+	//		}
+	//		clippingPolygonVerticies[j] = clippingWindow[0];
+	//		j += 2;
+	//	}
+	//
+	//}
 
 	*vertexInoutArray = j;
 	polygonsoutarr[polygon] = j;
