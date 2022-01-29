@@ -183,17 +183,6 @@ void PolygonRendering(int dimensions, int z, GLfloat* polygonVerticies, int* pol
 }
 
 
-void printbitmap(const string msg, double x, double y)
-{
-	glRasterPos2d(x, y);
-	for (string::const_iterator ii = msg.begin();
-		ii != msg.end();
-		++ii)
-	{
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *ii);
-	}
-}
-
 
 void clearWindow()
 {
@@ -201,9 +190,6 @@ void clearWindow()
 
 	// Documentation
 	glColor3d(0.0, 0.0, 0.0);  // Black text
-	printbitmap("Grafika "/*"Simple Mouse Demo"*/, 0.1, 0.9);
-	printbitmap("Ypologistwn"/*"Press left mouse button and move mouse"*/, 0.05, 0.55);
-	printbitmap(""/*"Esc   Quit"*/, 0.15, 0.25);
 
 	//clear written arrays
 	for (int i = 0; i < vertexInArray; i++)
@@ -303,8 +289,7 @@ bool onSegment(GLfloat px, GLfloat py, GLfloat qx , GLfloat qy, GLfloat rx, GLfl
 
 int orientation(GLfloat px, GLfloat py, GLfloat qx, GLfloat qy, GLfloat rx, GLfloat ry)
 {
-	// See https://www.geeksforgeeks.org/orientation-3-ordered-points/
-	// for details of below formula.
+
 	int val = (qy - py) * (rx - qx) -
 		(qx - px) * (ry - qy);
 
@@ -808,7 +793,7 @@ void PolygonClipping()
 	glFlush();
 }
 
-void Polygon() 
+void Programm() 
 {
 	int initialVertexPos = vertexInArray;
 
@@ -816,7 +801,7 @@ void Polygon()
 	{
 		clearWindow();
 		firstpt = false;
-		clearScreen = false;
+		clearScreen = false;  
 	}
 
 	if (mouseleftpressed && clippingEnabled) {
@@ -1133,7 +1118,7 @@ void MainMenuSelect(int choice)
 
 void Render()
 {
-	Polygon();      
+	Programm();      
 }
 
 
