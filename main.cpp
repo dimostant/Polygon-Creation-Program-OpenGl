@@ -850,6 +850,26 @@ GLuint height = 500;
 
 bool lI = false;
 
+void clearWindow()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	//clear written arrays
+	for (int i = 0; i < vertexInArray; i++)
+	{
+		polygonVerticies[i] = 0;
+	}
+
+	vertexInArray = 0;
+
+	for (int i = 0; i < polygonInArray; i++)
+	{
+		polygonVerticies[i] = 0;
+	}
+
+	polygonInArray = 0;
+}
+
 int getCreatedPolyTotalVerts() {
 	int vertexPos = 0;
 	for (int i = 0; i < polygonInArray; i++) {
@@ -885,8 +905,6 @@ void debugger(int N, int M) {
 	printf("polygonInArray : %d \n", polygonInArray);
 	printf("colorInArray : %d \n\n\n", colorInArray);
 }
-
-
 
 void PolygonRendering(int dimensions, int z)
 {
@@ -984,28 +1002,6 @@ void PolygonRendering(int dimensions, int z)
 	}
 
 }
-
-
-void clearWindow()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	//clear written arrays
-	for (int i = 0; i < vertexInArray; i++)
-	{
-		polygonVerticies[i] = 0;
-	}
-
-	vertexInArray = 0;
-
-	for (int i = 0; i < polygonInArray; i++)
-	{
-		polygonVerticies[i] = 0;
-	}
-
-	polygonInArray = 0;
-}
-
 
 void rerender()
 {
@@ -1455,6 +1451,7 @@ int main(int argc, char* argv[])
 	// - Allocate a Depth-Buffer in the system memory or 
 	//   in the video memory if 3D acceleration available
 	glutInitDisplayMode(GLUT_RGBA | GLUT_SINGLE);
+	//glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);// GLUT_SINGLE
 
 	// Define the main window size and initial position 
 	// ( upper left corner, boundaries included )
