@@ -906,10 +906,9 @@ void debugger(int N, int M) {
 	printf("colorInArray : %d \n\n\n", colorInArray);
 }
 
-void PolygonRendering(int dimensions, int z)
+void PolygonRendering(int dimensions, int z, GLfloat polygonVerticies[], int polygons[], GLfloat polygonsColors[], int vertexInArray, int polygonInArray, int colorInArray)
 {
-
-	//GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * 1);
+	polygonInArray = polygonInArray - 1;
 
 	GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray]);
 
@@ -932,8 +931,6 @@ void PolygonRendering(int dimensions, int z)
 
 	if (dimensions == 3) {
 		
-	cout << "\n poly" << polygons[polygonInArray] << ", " << polygons[polygonInArray] + polygons[polygonInArray] / 2 << "\n";
-
 		GLfloat*  tmp3dVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray] + polygons[polygonInArray] / 2);
 
 		printf("\n3d array : \n");
@@ -965,8 +962,6 @@ void PolygonRendering(int dimensions, int z)
 		
 		for (int i = vertexInArray - polygons[polygonInArray]; i < vertexInArray; i += 2)
 		{
-			j++;
-			cout << "square" << j << "\n";
 			
 			glBegin(GL_POLYGON);
 			glVertex3i(polygonVerticies[i], polygonVerticies[i + 1], 0);
@@ -983,54 +978,54 @@ void PolygonRendering(int dimensions, int z)
 			}
 			glEnd();
 
-
-			cout << polygonVerticies[i] << polygonVerticies[i + 1] << "0" << "\n";
-			cout << polygonVerticies[i] << polygonVerticies[i + 1] << "z" << "\n";
-			if (i == vertexInArray - 2)
-			{
-				cout << polygonVerticies[vertexInArray - polygons[polygonInArray]] << polygonVerticies[vertexInArray - polygons[polygonInArray] + 1] << "0" << "\n";
-				cout << polygonVerticies[vertexInArray - polygons[polygonInArray]] << polygonVerticies[vertexInArray - polygons[polygonInArray] + 1] << "z" << "\n";
-			}
-			else {
-				cout << polygonVerticies[i + 2] << polygonVerticies[i + 3] << "0" << "\n";
-				cout << polygonVerticies[i + 2] << polygonVerticies[i + 3] << "z" << "\n";
-			}
+			//debug
+			//j++;
+			//cout << "square" << j << "\n";
 
 
-			
+			//cout << polygonVerticies[i] << polygonVerticies[i + 1] << "0" << "\n";
+			//cout << polygonVerticies[i] << polygonVerticies[i + 1] << "z" << "\n";
+			//if (i == vertexInArray - 2)
+			//{
+			//	cout << polygonVerticies[vertexInArray - polygons[polygonInArray]] << polygonVerticies[vertexInArray - polygons[polygonInArray] + 1] << "0" << "\n";
+			//	cout << polygonVerticies[vertexInArray - polygons[polygonInArray]] << polygonVerticies[vertexInArray - polygons[polygonInArray] + 1] << "z" << "\n";
+			//}
+			//else {
+			//	cout << polygonVerticies[i + 2] << polygonVerticies[i + 3] << "0" << "\n";
+			//	cout << polygonVerticies[i + 2] << polygonVerticies[i + 3] << "z" << "\n";
+			//}
+
 		}
 	}
 
 }
 
-void rerender()
+void rerender(int dimensions, int z, GLfloat polygonVerticies[], int polygons[], GLfloat polygonsColors[], int vertexInArray, int polygonInArray, int colorInArray)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	int loops = polygonInArray;
-	vertexInArray = 0;
-	colorInArray = 0;
-	for (polygonInArray = 0; polygonInArray < loops; polygonInArray++)
-	{
-		vertexInArray += polygons[polygonInArray];
-		colorInArray += 3;
-		glColor3f(polygonsColors[colorInArray - 3], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
-		PolygonRendering(2, 5);
-	}
-}
+	
+	int newVertex = 0, newPolys = 0, newColors = 0;
 
-void rerender3d()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-	int loops = polygonInArray;
-	vertexInArray = 0;
-	colorInArray = 0;
-	for (polygonInArray = 0; polygonInArray < loops; polygonInArray++)
+	for (int i = 0; i < polygonInArray; i++)
 	{
-		vertexInArray += polygons[polygonInArray];
-		colorInArray += 3;
-		glColor3f(polygonsColors[colorInArray - 3], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
-		PolygonRendering(3, 5);
+		cout << "polygons[" << i << "] : " << polygons[i];
 	}
+
+	cout << "\n";
+
+	for (int i = 0; i < polygonInArray; i++)
+	{ 
+		newVertex += polygons[newPolys];
+		newPolys++;
+		newColors+= 3;
+
+		cout << "new Verts : " << newVertex << "\n";
+		cout << "newPolys : " << newPolys << "\n";
+		cout << "newColors : " << newColors << "\n";
+
+		PolygonRendering(2, 5, polygonVerticies, polygons, polygonsColors, newVertex, newPolys, newColors);
+	}
+
 }
 
 // The GLUT Keyboard function
@@ -1172,7 +1167,7 @@ void Polygon()
 			pt1y = pt2y;
 
 			//check for intersecting lines
-			if (vertexInArray == 6)
+			if (vertexInArray - getCreatedPolyTotalVerts() == 6)
 			{
 				lI = polygonVerticies[vertexInArray - 6] == polygonVerticies[vertexInArray - 2] && polygonVerticies[vertexInArray - 5] == polygonVerticies[vertexInArray - 1];
 			}
@@ -1194,13 +1189,27 @@ void Polygon()
 
 			if (lI == true)
 			{
-				rerender();
 				firstpt = false;
+				vertexInArray = getCreatedPolyTotalVerts();
+
+				cout << "\nlI : " << "\n";
+				cout << "debug 1 left click: \n";
+				debugger(40, 40);
+
+				rerender(2, 5, polygonVerticies, polygons, polygonsColors, vertexInArray, polygonInArray, colorInArray);
+
+				cout << "debug 2 left click: \n";
+				debugger(40, 40);
+				
+				
 				lI = false;
 			}
+			else
+				cout << "\nlI : " << lI << "\n";
 		}
 
 		mouseleftpressed = false;
+
 	}
 
 	if (mouserightpressed && lI == false)
@@ -1223,11 +1232,19 @@ void Polygon()
 
 		if (lI == true)
 		{
-			rerender();
-			firstpt = false;
+
+			vertexInArray = getCreatedPolyTotalVerts();
+
+			cout << "\nlI : " << "\n";
+			cout << "debug 1 right click: \n";
+			debugger(40, 40);
+			rerender(2, 5, polygonVerticies, polygons, polygonsColors, vertexInArray, polygonInArray, colorInArray);
+			cout << "debug 2 right click: \n";
+			debugger(40, 40);
 			lI = false;
 		}
 		else {
+			cout << "\nlI : " << lI << "\n";
 			//check for final line intersection
 			polygonsColors[colorInArray++] = fill_red;
 			polygonsColors[colorInArray++] = fill_green;
@@ -1235,18 +1252,25 @@ void Polygon()
 
 			polygons[polygonInArray] = vertexInArray - getCreatedPolyTotalVerts();
 
-			cout << "\n polygon : " << polygonInArray << "\n";
-			PolygonRendering(2, 5);
-
-			//reset 
-			mouserightpressed = false;
-			firstpt = false;
 			polygonInArray++;
-			//delete design lines
-			rerender();
+			
+			cout << "\npolygon : " << polygonInArray << "\n";
+			PolygonRendering(2, 5, polygonVerticies, polygons, polygonsColors, vertexInArray, polygonInArray, colorInArray);
+		
 
-			debugger(20, 20);
+			//delete design lines
+			cout << "debug 1 right click: \n";
+			debugger(40, 40);
+			rerender(2, 5, polygonVerticies, polygons, polygonsColors, vertexInArray, polygonInArray, colorInArray);
+			cout << "debug 2 right click: \n";
+			debugger(40, 40);
+
 		}
+
+		//reset 
+		mouserightpressed = false;
+		firstpt = false;
+
 	}
 
 	glFlush();
@@ -1304,7 +1328,6 @@ void LineColorSubMenu(int choice)
 
 }
 
-
 void FillColorSubMenu(int choice)
 {
 
@@ -1355,7 +1378,6 @@ void FillColorSubMenu(int choice)
 
 }
 
-
 void MainMenuSelect(int choice)
 {
 
@@ -1369,7 +1391,7 @@ void MainMenuSelect(int choice)
 		//  polygonEnabled = false;
 		//	break;
 	case EXTRUDE:
-		rerender3d();
+		rerender(3, 5, polygonVerticies, polygons, polygonsColors, vertexInArray, polygonInArray, colorInArray);
 		polygonEnabled = false;
 		break;
 	case CLEAR:
@@ -1383,7 +1405,6 @@ void MainMenuSelect(int choice)
 	glutPostRedisplay();
 
 }
-
 
 void Render()
 {
@@ -1403,7 +1424,6 @@ void Render()
 									 // the hidden buffer and hide the visible one           
 
 }
-
 
 void Resize(int w, int h)
 {
@@ -1427,14 +1447,12 @@ void Idle()
 
 }
 
-
 void Setup()  // DON'T TOUCH IT 
 {
 	// White background
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 
 }
-
 
 //-------------------- Main Program------------------------------
 
