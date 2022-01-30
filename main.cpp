@@ -858,7 +858,7 @@ int getCreatedPolyTotalVerts() {
 	return vertexPos;
 }
 
-void debugger() {
+void debugger(int N, int M) {
 
 	printf("polygonVerticies[ ");
 	//find a way to render only defined slots of array
@@ -874,18 +874,26 @@ void debugger() {
 		printf(" %d, ", polygons[i]);
 	}
 	printf("] \n ");
+
+	printf("polygons[");
+	for (int i = 0; i < M*3; i++)
+	{
+		printf(" %d, ", polygonsColors[i]);
+	}
+	printf("] \n ");
 	printf("vertexInArray : %d \n", vertexInArray);
-	printf("polygonInArray : %d \n\n\n", polygonInArray);
+	printf("polygonInArray : %d \n", polygonInArray);
+	printf("colorInArray : %d \n\n\n", colorInArray);
 }
+
 
 
 void PolygonRendering(int dimensions, int z)
 {
-	GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * 1);
 
-	polygons[polygonInArray] = vertexInArray - getCreatedPolyTotalVerts();
+	//GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * 1);
 
-	tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray]);
+	GLfloat* tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray]);
 
 	for (int i = 0; i < polygons[polygonInArray]; i++)
 	{
@@ -896,41 +904,85 @@ void PolygonRendering(int dimensions, int z)
 		else
 			printf("tmpVertArr[%d],y : %f \n", i, tmpVertArr[i]);*/
 	}
+
 	glColor3f(polygonsColors[colorInArray - 3], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
 
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(2, GL_FLOAT, 0, tmpVertArr);
+	glDrawArrays(GL_POLYGON, 0, polygons[polygonInArray] / 2);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
 	if (dimensions == 3) {
-		GLfloat* tmpFaceArr = (GLfloat*)malloc(sizeof(GLfloat) * 4);
-		tmpVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray] + polygons[polygonInArray] / 2);
+		
+	cout << "\n poly" << polygons[polygonInArray] << ", " << polygons[polygonInArray] + polygons[polygonInArray] / 2 << "\n";
 
-		for (int i = 0; i < polygons[polygonInArray] + polygons[polygonInArray] / 2; i++)
+		GLfloat*  tmp3dVertArr = (GLfloat*)malloc(sizeof(GLfloat) * polygons[polygonInArray] + polygons[polygonInArray] / 2);
+
+		printf("\n3d array : \n");
+
+		int j = 0;
+
+		for (int i = 0; i < polygons[polygonInArray]; i++)
 		{
-			tmpVertArr[i++] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i];
-			tmpVertArr[i++] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i];
-			tmpVertArr[i] = z;
-
+			tmp3dVertArr[i + j] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i++];
+			tmp3dVertArr[i + j] = polygonVerticies[vertexInArray - polygons[polygonInArray] + i];
+			tmp3dVertArr[i + j + 1] = z;
+			
+			j++;
+			
 			//debug
-			/*if (i == 0 || i % 2 == 0)
-				printf("tmpVertArr[%d],x : %f", i, tmpVertArr[i]);
-			else
-				printf("tmpVertArr[%d],y : %f \n", i, tmpVertArr[i]);*/
+			printf("tmp3dVertArr[%d],x : %f, ", i + j - 2, tmp3dVertArr[i + j - 2]);
+			printf("tmp3dVertArr[%d],y : %f, ", i + j - 1, tmp3dVertArr[i + j - 1]);
+			printf("tmp3dVertArr[%d],z : %f, \n", i + j, tmp3dVertArr[i + j]);
+
 		}
 		glColor3f(polygonsColors[colorInArray - 3], polygonsColors[colorInArray - 2], polygonsColors[colorInArray - 1]);
 
-		for (int i = 0; i < vertexInArray - getCreatedPolyTotalVerts(); i += 4)
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(3, GL_FLOAT, 0, tmp3dVertArr);
+		glDrawArrays(GL_POLYGON, 0, polygons[polygonInArray] / 3);
+		glDisableClientState(GL_VERTEX_ARRAY);
+
+		j = 0;
+		
+		for (int i = vertexInArray - polygons[polygonInArray]; i < vertexInArray; i += 2)
 		{
+			j++;
+			cout << "square" << j << "\n";
+			
 			glBegin(GL_POLYGON);
 			glVertex3i(polygonVerticies[i], polygonVerticies[i + 1], 0);
 			glVertex3i(polygonVerticies[i], polygonVerticies[i + 1], z);
-			glVertex3i(polygonVerticies[i + 2], polygonVerticies[i + 3], 0);
-			glVertex3i(polygonVerticies[i + 2], polygonVerticies[i + 3], z);
+
+			if (i == vertexInArray - 2 )
+			{	
+				glVertex3i(polygonVerticies[vertexInArray - polygons[polygonInArray]], polygonVerticies[vertexInArray - polygons[polygonInArray] + 1], 0);
+				glVertex3i(polygonVerticies[vertexInArray - polygons[polygonInArray]], polygonVerticies[vertexInArray - polygons[polygonInArray] + 1], z);
+			}
+			else {
+				glVertex3i(polygonVerticies[i + 2], polygonVerticies[i + 3], 0);
+				glVertex3i(polygonVerticies[i + 2], polygonVerticies[i + 3], z);
+			}
 			glEnd();
+
+
+			cout << polygonVerticies[i] << polygonVerticies[i + 1] << "0" << "\n";
+			cout << polygonVerticies[i] << polygonVerticies[i + 1] << "z" << "\n";
+			if (i == vertexInArray - 2)
+			{
+				cout << polygonVerticies[vertexInArray - polygons[polygonInArray]] << polygonVerticies[vertexInArray - polygons[polygonInArray] + 1] << "0" << "\n";
+				cout << polygonVerticies[vertexInArray - polygons[polygonInArray]] << polygonVerticies[vertexInArray - polygons[polygonInArray] + 1] << "z" << "\n";
+			}
+			else {
+				cout << polygonVerticies[i + 2] << polygonVerticies[i + 3] << "0" << "\n";
+				cout << polygonVerticies[i + 2] << polygonVerticies[i + 3] << "z" << "\n";
+			}
+
+
+			
 		}
 	}
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(dimensions, GL_FLOAT, 0, tmpVertArr);
-	glDrawArrays(GL_POLYGON, 0, polygons[polygonInArray] / dimensions);
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 
@@ -1185,6 +1237,9 @@ void Polygon()
 			polygonsColors[colorInArray++] = fill_green;
 			polygonsColors[colorInArray++] = fill_blue;
 
+			polygons[polygonInArray] = vertexInArray - getCreatedPolyTotalVerts();
+
+			cout << "\n polygon : " << polygonInArray << "\n";
 			PolygonRendering(2, 5);
 
 			//reset 
@@ -1193,6 +1248,8 @@ void Polygon()
 			polygonInArray++;
 			//delete design lines
 			rerender();
+
+			debugger(20, 20);
 		}
 	}
 
