@@ -14,6 +14,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main.h" />
+    <Text Include="C:\Users\dimos\Downloads\solid1.txt">
+      <Filter>Source</Filter>
+    </Text>
   </ItemGroup>
 </Project>
