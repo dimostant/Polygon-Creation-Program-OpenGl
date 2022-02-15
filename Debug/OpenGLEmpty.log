@@ -17,5 +17,4 @@ D:\@University\Lessons\4dYear\Graphics\Project\Polygon-Creation-Program-OpenGl\m
 D:\@University\Lessons\4dYear\Graphics\Project\Polygon-Creation-Program-OpenGl\main.cpp(384,26): warning C4309: 'initializing': truncation of constant value
 D:\@University\Lessons\4dYear\Graphics\Project\Polygon-Creation-Program-OpenGl\main.cpp(385,20): warning C4838: conversion from 'int' to 'char' requires a narrowing conversion
 D:\@University\Lessons\4dYear\Graphics\Project\Polygon-Creation-Program-OpenGl\main.cpp(385,20): warning C4309: 'initializing': truncation of constant value
-main.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
   OpenGLEmpty.vcxproj -> D:\@University\Lessons\4dYear\Graphics\Project\Polygon-Creation-Program-OpenGl\Debug\Ergasia 1.exe

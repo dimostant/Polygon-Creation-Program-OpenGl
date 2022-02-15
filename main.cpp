@@ -392,11 +392,36 @@ void shape() {
             rowCount++;
     }
 
-    GLfloat *tmpArr = (GLfloat*)malloc(100 * sizeof(GLfloat) * rowCount);
+    cout << "\n" << rowCount << "\n";
 
+    GLfloat *tmpArr = (GLfloat*)malloc(100 * sizeof(GLfloat) * rowCount * 3);
+
+    
+    cout << "\n" << sizeof(tmpArr);
+
+    cout << "\n\n";
     for (int j = 0; j < rowCount; j++) {
-        tmpArr[j] = beginQuads[0][j];
+        tmpArr[j * 3] = beginVerts[beginQuads[0][j] - '0'][0];
+        tmpArr[j * 3 + 1] = beginVerts[beginQuads[0][j] - '0'][1];
+        tmpArr[j * 3 + 2] = beginVerts[beginQuads[0][j] - '0'][2];
+        cout << beginVerts[beginQuads[0][j] - '0'][0] << " ";
+        cout << beginVerts[beginQuads[0][j] - '0'][1] << " ";
+        cout << beginVerts[beginQuads[0][j] - '0'][2] << "\n";
+        
     }
+    cout << "\n\n";
+    cout << "\n"; 
+    for (int j = 0; j < rowCount; j++) {
+        cout << tmpArr[j * 3]<< " ";
+        cout << tmpArr[j * 3 + 1] << " ";
+        cout << tmpArr[j * 3 + 2] << " ";
+        cout << "\n";   
+    }
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, tmpArr);
+    glDrawArrays(GL_POLYGON, 0, 3);
+    glDisableClientState(GL_VERTEX_ARRAY);
 
 
 //A:	2 1 0;
