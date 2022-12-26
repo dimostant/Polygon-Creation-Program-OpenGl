@@ -1,0 +1,5 @@
+﻿  main.cpp
+C:\Projects\Polygon-Creation-Program-OpenGl\main.cpp(916,11): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'double'
+C:\Projects\Polygon-Creation-Program-OpenGl\main.cpp(944,11): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'double'
+LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:ICF' specification
+LINK : fatal error LNK1104: cannot open file 'glut32.lib'
