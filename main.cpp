@@ -1180,6 +1180,9 @@ void LeftClipping(GLfloat* polygonVerticies, int* size)
 {
 	int j = 0;
 	GLfloat clippingPolygonVerticies[N];
+
+	polygonVerticies[*size - 2] = polygonVerticies[0];
+	polygonVerticies[*size - 1] = polygonVerticies[1];
 	
 	//for (int i = 0; i < *size; i+=2) {
 	//	cout << "\n inputArr[" << i << "] = " << polygonVerticies[i] << "inputArr[" << i + 1 << "] = " << polygonVerticies[i + 1] << " \n ";
@@ -1288,13 +1291,17 @@ void LeftClipping(GLfloat* polygonVerticies, int* size)
 	{
 		polygonVerticies[i] = clippingPolygonVerticies[i];
 	}
-	*size = j;
+	*size = j + 2;
 }
 
 //void TopClipping(GLfloat* polygonVerticies, int* size)
 //{
 //	int j = 0;
 //	GLfloat clippingPolygonVerticies[N];
+//
+// 
+//  	polygonVerticies[*size - 2] = polygonVerticies[0];
+//		polygonVerticies[*size - 1] = polygonVerticies[1];
 //
 //	//for (int i = 0; i < *size; i+=2) {
 //	//	cout << "\n inputArr[" << i << "] = " << polygonVerticies[i] << "inputArr[" << i + 1 << "] = " << polygonVerticies[i + 1] << " \n ";
@@ -1403,7 +1410,7 @@ void LeftClipping(GLfloat* polygonVerticies, int* size)
 //	{
 //		polygonVerticies[i] = clippingPolygonVerticies[i];
 //	}
-//	*size = j;
+//	*size = j + 2;
 //}
 
 void RightClipping(GLfloat* polygonVerticies, int* size)
@@ -1411,9 +1418,13 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 	int j = 0;
 	GLfloat clippingPolygonVerticies[N];
 
-	//for (int i = 0; i < *size; i+=2) {
-	//	cout << "\n inputArr[" << i << "] = " << polygonVerticies[i] << "inputArr[" << i + 1 << "] = " << polygonVerticies[i + 1] << " \n ";
-	//}
+	polygonVerticies[*size - 2] = polygonVerticies[0];
+	polygonVerticies[*size - 1] = polygonVerticies[1];
+
+
+	for (int i = 0; i < *size; i+=2) {
+		cout << "\n inputArr[" << i << "] = " << polygonVerticies[i] << "inputArr[" << i + 1 << "] = " << polygonVerticies[i + 1] << " \n ";
+	}
 
 	for (int i = 0; i < *size; i++) {
 		clippingPolygonVerticies[i] = 0;
@@ -1428,7 +1439,7 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 		//cout << "\npolygonVerticies[i + previousPolygonsVers + 2] : " << polygonVerticies[i + previousPolygonsVers + 2] << "\n";
 		//cout << "\npolygonVerticies[i + previousPolygonsVers + 3] : " << polygonVerticies[i + previousPolygonsVers + 3] << "\n";
 
-		if (polygonVerticies[i] < clippingWindow[0] && polygonVerticies[i + 2] >= clippingWindow[0])
+		if (polygonVerticies[i] > clippingWindow[2] && polygonVerticies[i + 2] <= clippingWindow[2])
 		{
 
 			//x2 - x1 != 0
@@ -1437,7 +1448,7 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 				//s(slope) -> (y2-y1) / (x2-x1)
 				//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
 				//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
-				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (clippingWindow[0] - polygonVerticies[i]) + polygonVerticies[i + 1];
+				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (clippingWindow[2] - polygonVerticies[i]) + polygonVerticies[i + 1];
 				//std::cout << "\nbruh 32";
 				//std::cout << " j :" << j;
 				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
@@ -1449,7 +1460,7 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 				//std::cout << " j :" << j;
 				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
 			}
-			clippingPolygonVerticies[j] = clippingWindow[0];
+			clippingPolygonVerticies[j] = clippingWindow[2];
 			//std::cout << " j :" << j;
 			//std::cout << " \n" << clippingPolygonVerticies[j];
 
@@ -1463,7 +1474,7 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 			j += 4;
 		}
 		//second case -> inside to inside
-		if (polygonVerticies[i] >= clippingWindow[0] && polygonVerticies[i + 2] >= clippingWindow[0])
+		if (polygonVerticies[i] <= clippingWindow[2] && polygonVerticies[i + 2] <= clippingWindow[2])
 		{
 
 			clippingPolygonVerticies[j] = polygonVerticies[i + 2];		//x2
@@ -1475,12 +1486,12 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 			j += 2;
 		}
 		//third case -> inside to outside -> 1 vertex
-		if (polygonVerticies[i] >= clippingWindow[0] && polygonVerticies[i + 2] < clippingWindow[0])
+		if (polygonVerticies[i] <= clippingWindow[2] && polygonVerticies[i + 2] > clippingWindow[2])
 		{
 			//x2 - x1 != 0
 			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
 			{
-				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (clippingWindow[0] - polygonVerticies[i]) + polygonVerticies[i + 1];
+				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (clippingWindow[2] - polygonVerticies[i]) + polygonVerticies[i + 1];
 				/*std::cout << "\nbruh 2" << clippingPolygonVerticies[j + 1];
 				std::cout << " j :" << j;
 				std::cout << " \n" << clippingPolygonVerticies[j + 1];*/
@@ -1494,7 +1505,7 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
 
 			}
-			clippingPolygonVerticies[j] = clippingWindow[0];
+			clippingPolygonVerticies[j] = clippingWindow[2];
 			//std::cout << "\nbruh 0";
 			//std::cout << " j :" << j;
 			//std::cout << " \n" << clippingPolygonVerticies[j];
@@ -1503,14 +1514,14 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 	}
 
 
-	//cout << "j :" << j << "\n";
-	//for (int i = 0; i < j; i++)
-	//{
-	//	cout << "clipPolyVs[" << i << "],x : " << clippingPolygonVerticies[i];
-	//	cout << ", clipPolyVs[" << ++i << "],y : " << clippingPolygonVerticies[i];
-	//	cout << "\n";
-	//}
-	//cout << "\n";
+	cout << "j :" << j << "\n";
+	for (int i = 0; i < j; i++)
+	{
+		cout << "clipPolyVs[" << i << "],x : " << clippingPolygonVerticies[i];
+		cout << ", clipPolyVs[" << ++i << "],y : " << clippingPolygonVerticies[i];
+		cout << "\n";
+	}
+	cout << "\n";
 
 
 	//"how to pass an array to another from the pointer" to optimize
@@ -1518,7 +1529,7 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 	{
 		polygonVerticies[i] = clippingPolygonVerticies[i];
 	}
-	*size = j;
+	*size = j + 2;
 }
 
 //void BottomClipping(GLfloat* polygonVerticies, int* size)
@@ -1526,6 +1537,9 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 //	int j = 0;
 //	GLfloat clippingPolygonVerticies[N];
 //
+// 
+//  polygonVerticies[*size - 2] = polygonVerticies[0];
+//  polygonVerticies[*size - 1] = polygonVerticies[1];
 //	//for (int i = 0; i < *size; i+=2) {
 //	//	cout << "\n inputArr[" << i << "] = " << polygonVerticies[i] << "inputArr[" << i + 1 << "] = " << polygonVerticies[i + 1] << " \n ";
 //	//}
@@ -1633,7 +1647,7 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 //	{
 //		polygonVerticies[i] = clippingPolygonVerticies[i];
 //	}
-//	*size = j;
+//	*size = j + 2; since thats the final function the + 2 and the command that removes the 2 in polygonclipping can be removed
 //}
 
 
@@ -1646,7 +1660,7 @@ void PolygonClipping()
 	int previousOriginalPolygonsVers = 0;
 	//int previousClippedPolygonsVers = 0;
 
-	//traverse the array of vertices
+	//traverse the array of verticesx
 	cout << "\npolygonInArray : " << polygonInArray <<"\n";
 	for (int k = 0; k < polygonInArray; k++) {
 		//cout << "\nk :" << k << "\n";
@@ -1669,18 +1683,21 @@ void PolygonClipping()
 		}
 
 		//add cycle point (the first two points) ath the end of the single polygon being proccessed
-		currentPolygonVerticies[polygons[k]] = currentPolygonVerticies[0];
-		currentPolygonVerticies[polygons[k] + 1] = currentPolygonVerticies[1];
+		//currentPolygonVerticies[polygons[k]] = currentPolygonVerticies[0];
+		//currentPolygonVerticies[polygons[k] + 1] = currentPolygonVerticies[1];
 
 		//clip the polygon
 		//cout << "\ninput size : " << sizeofcurrent << "\n";
+		cout << "\n L\n";
 		LeftClipping(currentPolygonVerticies, &sizeofcurrent);
 		//cout << "\noutput size : " << sizeofcurrent << "\n";
 		//top
-		//right
+		//sizeofcurrent += 4;// sth like that
+		cout << "\n R\n";
+		RightClipping(currentPolygonVerticies, &sizeofcurrent);
 		//bottom 
 
-
+		sizeofcurrent -= 2;
 		//add array to clipping array and values
 		for (int i = 0; i < sizeofcurrent; i++) {
 			clippingPolygonVerticies[i + clippingVertexInArray] = currentPolygonVerticies[i];
@@ -1691,7 +1708,8 @@ void PolygonClipping()
 		clippingPolygons[k] = sizeofcurrent;
 		clippingPolygonInArray += 1;
 		//cout << "\n AFTER clippingVertexInArray = " << clippingVertexInArray << ", clippingPolygonInArray" << clippingPolygonInArray << "\n";
-
+		
+		//*implement counters reseting appropriately after polygon is clipped out completely
 
 		//cout << "\nk :" << k << "\n";
 	}
