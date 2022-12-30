@@ -1181,6 +1181,7 @@ void LeftClipping(GLfloat* polygonVerticies, int* size)
 	int j = 0;
 	GLfloat clippingPolygonVerticies[N];
 
+	//add cycle point (the first two points) ath the end of the single polygon being proccessed
 	polygonVerticies[*size - 2] = polygonVerticies[0];
 	polygonVerticies[*size - 1] = polygonVerticies[1];
 	
@@ -1294,130 +1295,131 @@ void LeftClipping(GLfloat* polygonVerticies, int* size)
 	*size = j + 2;
 }
 
-//void TopClipping(GLfloat* polygonVerticies, int* size)
-//{
-//	int j = 0;
-//	GLfloat clippingPolygonVerticies[N];
-//
-// 
-//  	polygonVerticies[*size - 2] = polygonVerticies[0];
-//		polygonVerticies[*size - 1] = polygonVerticies[1];
-//
-//	//for (int i = 0; i < *size; i+=2) {
-//	//	cout << "\n inputArr[" << i << "] = " << polygonVerticies[i] << "inputArr[" << i + 1 << "] = " << polygonVerticies[i + 1] << " \n ";
-//	//}
-//
-//	for (int i = 0; i < *size; i++) {
-//		clippingPolygonVerticies[i] = 0;
-//	}
-//
-//	// notice -2 cause of the extra slots in the array for the cycle points
-//	for (int i = 0; i < *size - 2; i += 2)
-//	{
-//		//cout << "\ni : " << i;
-//		//cout << "\npolygonVerticies[i + previousPolygonsVers] : " << polygonVerticies[i + previousPolygonsVers] << "\n";
-//		//cout << "\npolygonVerticies[i + previousPolygonsVers + 1] : " << polygonVerticies[i + previousPolygonsVers + 1] << "\n";
-//		//cout << "\npolygonVerticies[i + previousPolygonsVers + 2] : " << polygonVerticies[i + previousPolygonsVers + 2] << "\n";
-//		//cout << "\npolygonVerticies[i + previousPolygonsVers + 3] : " << polygonVerticies[i + previousPolygonsVers + 3] << "\n";
-//
-//		if (polygonVerticies[i] < clippingWindow[0] && polygonVerticies[i + 2] >= clippingWindow[0])
-//		{
-//
-//			//x2 - x1 != 0
-//			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
-//			{
-//				//s(slope) -> (y2-y1) / (x2-x1)
-//				//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
-//				//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
-//				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (clippingWindow[0] - polygonVerticies[i]) + polygonVerticies[i + 1];
-//				//std::cout << "\nbruh 32";
-//				//std::cout << " j :" << j;
-//				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
-//			}
-//			else	//the line is completely straight, s = 0 -> y fixed
-//			{
-//				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1];
-//				//std::cout << "\nbruh 31";
-//				//std::cout << " j :" << j;
-//				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
-//			}
-//			clippingPolygonVerticies[j] = clippingWindow[0];
-//			//std::cout << " j :" << j;
-//			//std::cout << " \n" << clippingPolygonVerticies[j];
-//
-//			//the inside points
-//			clippingPolygonVerticies[j + 2] = polygonVerticies[i + 2];
-//			clippingPolygonVerticies[j + 3] = polygonVerticies[i + 3];
-//			/*std::cout << "\nbruh 3";
-//			std::cout << " j :" << j;
-//			std::cout << " \n" << clippingPolygonVerticies[j + 2];
-//			std::cout << " \n" << clippingPolygonVerticies[j + 3];*/
-//			j += 4;
-//		}
-//		//second case -> inside to inside
-//		if (polygonVerticies[i] >= clippingWindow[0] && polygonVerticies[i + 2] >= clippingWindow[0])
-//		{
-//
-//			clippingPolygonVerticies[j] = polygonVerticies[i + 2];		//x2
-//			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3];	//y2
-//			/*		std::cout << "\nbruh 3";
-//					std::cout << "j :" << j;
-//					std::cout << " \n" << clippingPolygonVerticies[j ];
-//					std::cout << " \n" << clippingPolygonVerticies[j + 1];*/
-//			j += 2;
-//		}
-//		//third case -> inside to outside -> 1 vertex
-//		if (polygonVerticies[i] >= clippingWindow[0] && polygonVerticies[i + 2] < clippingWindow[0])
-//		{
-//			//x2 - x1 != 0
-//			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
-//			{
-//				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (clippingWindow[0] - polygonVerticies[i]) + polygonVerticies[i + 1];
-//				/*std::cout << "\nbruh 2" << clippingPolygonVerticies[j + 1];
-//				std::cout << " j :" << j;
-//				std::cout << " \n" << clippingPolygonVerticies[j + 1];*/
-//
-//			}
-//			else	//the line is completely straight, s = 0 -> y fixed
-//			{
-//				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1];
-//				//std::cout << "\nbruh 1";
-//				//std::cout << " j :" << j;
-//				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
-//
-//			}
-//			clippingPolygonVerticies[j] = clippingWindow[0];
-//			//std::cout << "\nbruh 0";
-//			//std::cout << " j :" << j;
-//			//std::cout << " \n" << clippingPolygonVerticies[j];
-//			j += 2;
-//		}
-//	}
-//
-//
-//	//cout << "j :" << j << "\n";
-//	//for (int i = 0; i < j; i++)
-//	//{
-//	//	cout << "clipPolyVs[" << i << "],x : " << clippingPolygonVerticies[i];
-//	//	cout << ", clipPolyVs[" << ++i << "],y : " << clippingPolygonVerticies[i];
-//	//	cout << "\n";
-//	//}
-//	//cout << "\n";
-//
-//
-//	//"how to pass an array to another from the pointer" to optimize
-//	for (int i = 0; i < j; i++)
-//	{
-//		polygonVerticies[i] = clippingPolygonVerticies[i];
-//	}
-//	*size = j + 2;
-//}
+void TopClipping(GLfloat* polygonVerticies, int* size)
+{
+	int j = 0;
+	GLfloat clippingPolygonVerticies[N];
+
+	//add cycle point (the first two points) ath the end of the single polygon being proccessed
+  	polygonVerticies[*size - 2] = polygonVerticies[0];
+	polygonVerticies[*size - 1] = polygonVerticies[1];
+
+	//for (int i = 0; i < *size; i+=2) {
+	//	cout << "\n inputArr[" << i << "] = " << polygonVerticies[i] << "inputArr[" << i + 1 << "] = " << polygonVerticies[i + 1] << " \n ";
+	//}
+
+	for (int i = 0; i < *size; i++) {
+		clippingPolygonVerticies[i] = 0;
+	}
+
+	// notice -2 cause of the extra slots in the array for the cycle points
+	for (int i = 0; i < *size - 2; i += 2)
+	{
+		//cout << "\ni : " << i;
+		//cout << "\npolygonVerticies[i + previousPolygonsVers] : " << polygonVerticies[i + previousPolygonsVers] << "\n";
+		//cout << "\npolygonVerticies[i + previousPolygonsVers + 1] : " << polygonVerticies[i + previousPolygonsVers + 1] << "\n";
+		//cout << "\npolygonVerticies[i + previousPolygonsVers + 2] : " << polygonVerticies[i + previousPolygonsVers + 2] << "\n";
+		//cout << "\npolygonVerticies[i + previousPolygonsVers + 3] : " << polygonVerticies[i + previousPolygonsVers + 3] << "\n";
+
+		if (polygonVerticies[i + 1] > clippingWindow[1] && polygonVerticies[i + 3] <= clippingWindow[0])
+		{
+
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
+			{
+				//s(slope) -> (y2-y1) / (x2-x1)
+				//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
+				//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
+				clippingPolygonVerticies[j] = ((polygonVerticies[i + 2] - polygonVerticies[i])) / (polygonVerticies[i + 3] - polygonVerticies[i + 1]) * (clippingWindow[1] - polygonVerticies[i + 1]) + polygonVerticies[i];
+				//std::cout << "\nbruh 32";
+				//std::cout << " j :" << j;
+				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j] = polygonVerticies[i];
+				//std::cout << "\nbruh 31";
+				//std::cout << " j :" << j;
+				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
+			}
+			clippingPolygonVerticies[j] = clippingWindow[1];
+			//std::cout << " j :" << j;
+			//std::cout << " \n" << clippingPolygonVerticies[j];
+
+			//the inside points
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2];
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3];
+			/*std::cout << "\nbruh 3";
+			std::cout << " j :" << j;
+			std::cout << " \n" << clippingPolygonVerticies[j + 2];
+			std::cout << " \n" << clippingPolygonVerticies[j + 3];*/
+			j += 4;
+		}
+		//second case -> inside to inside
+		if (polygonVerticies[i + 1] <= clippingWindow[1] && polygonVerticies[i + 3] >= clippingWindow[1])
+		{
+
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2];		//x2
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3];	//y2
+			/*		std::cout << "\nbruh 3";
+					std::cout << "j :" << j;
+					std::cout << " \n" << clippingPolygonVerticies[j ];
+					std::cout << " \n" << clippingPolygonVerticies[j + 1];*/
+			j += 2;
+		}
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i + 1] <= clippingWindow[1] && polygonVerticies[i + 3] > clippingWindow[1])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
+			{
+				clippingPolygonVerticies[j] = ((polygonVerticies[i + 2] - polygonVerticies[i])) / (polygonVerticies[i + 3] - polygonVerticies[i + 1]) * (clippingWindow[1] - polygonVerticies[i + 1]) + polygonVerticies[i];
+				/*std::cout << "\nbruh 2" << clippingPolygonVerticies[j + 1];
+				std::cout << " j :" << j;
+				std::cout << " \n" << clippingPolygonVerticies[j + 1];*/
+
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j] = polygonVerticies[i];
+				//std::cout << "\nbruh 1";
+				//std::cout << " j :" << j;
+				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
+
+			}
+			clippingPolygonVerticies[j] = clippingWindow[1];
+			//std::cout << "\nbruh 0";
+			//std::cout << " j :" << j;
+			//std::cout << " \n" << clippingPolygonVerticies[j];
+			j += 2;
+		}
+	}
+
+
+	//cout << "j :" << j << "\n";
+	//for (int i = 0; i < j; i++)
+	//{
+	//	cout << "clipPolyVs[" << i << "],x : " << clippingPolygonVerticies[i];
+	//	cout << ", clipPolyVs[" << ++i << "],y : " << clippingPolygonVerticies[i];
+	//	cout << "\n";
+	//}
+	//cout << "\n";
+
+
+	//"how to pass an array to another from the pointer" to optimize
+	for (int i = 0; i < j; i++)
+	{
+		polygonVerticies[i] = clippingPolygonVerticies[i];
+	}
+	*size = j + 2;
+}
 
 void RightClipping(GLfloat* polygonVerticies, int* size)
 {
 	int j = 0;
 	GLfloat clippingPolygonVerticies[N];
 
+	//add cycle point (the first two points) ath the end of the single polygon being proccessed
 	polygonVerticies[*size - 2] = polygonVerticies[0];
 	polygonVerticies[*size - 1] = polygonVerticies[1];
 
@@ -1532,123 +1534,124 @@ void RightClipping(GLfloat* polygonVerticies, int* size)
 	*size = j + 2;
 }
 
-//void BottomClipping(GLfloat* polygonVerticies, int* size)
-//{
-//	int j = 0;
-//	GLfloat clippingPolygonVerticies[N];
-//
-// 
-//  polygonVerticies[*size - 2] = polygonVerticies[0];
-//  polygonVerticies[*size - 1] = polygonVerticies[1];
-//	//for (int i = 0; i < *size; i+=2) {
-//	//	cout << "\n inputArr[" << i << "] = " << polygonVerticies[i] << "inputArr[" << i + 1 << "] = " << polygonVerticies[i + 1] << " \n ";
-//	//}
-//
-//	for (int i = 0; i < *size; i++) {
-//		clippingPolygonVerticies[i] = 0;
-//	}
-//
-//	// notice -2 cause of the extra slots in the array for the cycle points
-//	for (int i = 0; i < *size - 2; i += 2)
-//	{
-//		//cout << "\ni : " << i;
-//		//cout << "\npolygonVerticies[i + previousPolygonsVers] : " << polygonVerticies[i + previousPolygonsVers] << "\n";
-//		//cout << "\npolygonVerticies[i + previousPolygonsVers + 1] : " << polygonVerticies[i + previousPolygonsVers + 1] << "\n";
-//		//cout << "\npolygonVerticies[i + previousPolygonsVers + 2] : " << polygonVerticies[i + previousPolygonsVers + 2] << "\n";
-//		//cout << "\npolygonVerticies[i + previousPolygonsVers + 3] : " << polygonVerticies[i + previousPolygonsVers + 3] << "\n";
-//
-//		if (polygonVerticies[i] < clippingWindow[0] && polygonVerticies[i + 2] >= clippingWindow[0])
-//		{
-//
-//			//x2 - x1 != 0
-//			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
-//			{
-//				//s(slope) -> (y2-y1) / (x2-x1)
-//				//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
-//				//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
-//				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (clippingWindow[0] - polygonVerticies[i]) + polygonVerticies[i + 1];
-//				//std::cout << "\nbruh 32";
-//				//std::cout << " j :" << j;
-//				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
-//			}
-//			else	//the line is completely straight, s = 0 -> y fixed
-//			{
-//				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1];
-//				//std::cout << "\nbruh 31";
-//				//std::cout << " j :" << j;
-//				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
-//			}
-//			clippingPolygonVerticies[j] = clippingWindow[0];
-//			//std::cout << " j :" << j;
-//			//std::cout << " \n" << clippingPolygonVerticies[j];
-//
-//			//the inside points
-//			clippingPolygonVerticies[j + 2] = polygonVerticies[i + 2];
-//			clippingPolygonVerticies[j + 3] = polygonVerticies[i + 3];
-//			/*std::cout << "\nbruh 3";
-//			std::cout << " j :" << j;
-//			std::cout << " \n" << clippingPolygonVerticies[j + 2];
-//			std::cout << " \n" << clippingPolygonVerticies[j + 3];*/
-//			j += 4;
-//		}
-//		//second case -> inside to inside
-//		if (polygonVerticies[i] >= clippingWindow[0] && polygonVerticies[i + 2] >= clippingWindow[0])
-//		{
-//
-//			clippingPolygonVerticies[j] = polygonVerticies[i + 2];		//x2
-//			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3];	//y2
-//			/*		std::cout << "\nbruh 3";
-//					std::cout << "j :" << j;
-//					std::cout << " \n" << clippingPolygonVerticies[j ];
-//					std::cout << " \n" << clippingPolygonVerticies[j + 1];*/
-//			j += 2;
-//		}
-//		//third case -> inside to outside -> 1 vertex
-//		if (polygonVerticies[i] >= clippingWindow[0] && polygonVerticies[i + 2] < clippingWindow[0])
-//		{
-//			//x2 - x1 != 0
-//			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
-//			{
-//				clippingPolygonVerticies[j + 1] = ((polygonVerticies[i + 3] - polygonVerticies[i + 1])) / (polygonVerticies[i + 2] - polygonVerticies[i]) * (clippingWindow[0] - polygonVerticies[i]) + polygonVerticies[i + 1];
-//				/*std::cout << "\nbruh 2" << clippingPolygonVerticies[j + 1];
-//				std::cout << " j :" << j;
-//				std::cout << " \n" << clippingPolygonVerticies[j + 1];*/
-//
-//			}
-//			else	//the line is completely straight, s = 0 -> y fixed
-//			{
-//				clippingPolygonVerticies[j + 1] = polygonVerticies[i + 1];
-//				//std::cout << "\nbruh 1";
-//				//std::cout << " j :" << j;
-//				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
-//
-//			}
-//			clippingPolygonVerticies[j] = clippingWindow[0];
-//			//std::cout << "\nbruh 0";
-//			//std::cout << " j :" << j;
-//			//std::cout << " \n" << clippingPolygonVerticies[j];
-//			j += 2;
-//		}
-//	}
-//
-//
-//	//cout << "j :" << j << "\n";
-//	//for (int i = 0; i < j; i++)
-//	//{
-//	//	cout << "clipPolyVs[" << i << "],x : " << clippingPolygonVerticies[i];
-//	//	cout << ", clipPolyVs[" << ++i << "],y : " << clippingPolygonVerticies[i];
-//	//	cout << "\n";
-//	//}
-//	//cout << "\n";
-//
-//
-//	//"how to pass an array to another from the pointer" to optimize
-//	for (int i = 0; i < j; i++)
-//	{
-//		polygonVerticies[i] = clippingPolygonVerticies[i];
-//	}
-//	*size = j + 2; since thats the final function the + 2 and the command that removes the 2 in polygonclipping can be removed
-//}
+void BottomClipping(GLfloat* polygonVerticies, int* size)
+{
+	int j = 0;
+	GLfloat clippingPolygonVerticies[N];
+
+	//add cycle point (the first two points) ath the end of the single polygon being proccessed
+
+	polygonVerticies[*size - 2] = polygonVerticies[0];
+	polygonVerticies[*size - 1] = polygonVerticies[1];
+	//for (int i = 0; i < *size; i+=2) {
+	//	cout << "\n inputArr[" << i << "] = " << polygonVerticies[i] << "inputArr[" << i + 1 << "] = " << polygonVerticies[i + 1] << " \n ";
+	//}
+
+	for (int i = 0; i < *size; i++) {
+		clippingPolygonVerticies[i] = 0;
+	}
+
+	// notice -2 cause of the extra slots in the array for the cycle points
+	for (int i = 0; i < *size - 2; i += 2)
+	{
+		//cout << "\ni : " << i;
+		//cout << "\npolygonVerticies[i + previousPolygonsVers] : " << polygonVerticies[i + previousPolygonsVers] << "\n";
+		//cout << "\npolygonVerticies[i + previousPolygonsVers + 1] : " << polygonVerticies[i + previousPolygonsVers + 1] << "\n";
+		//cout << "\npolygonVerticies[i + previousPolygonsVers + 2] : " << polygonVerticies[i + previousPolygonsVers + 2] << "\n";
+		//cout << "\npolygonVerticies[i + previousPolygonsVers + 3] : " << polygonVerticies[i + previousPolygonsVers + 3] << "\n";
+
+		if (polygonVerticies[i + 1] > clippingWindow[3] && polygonVerticies[i + 3] >= clippingWindow[3])
+		{
+
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
+			{
+				//s(slope) -> (y2-y1) / (x2-x1)
+				//line through (x1,y1) and (x2,y2) (equation of line) -> clippingWindow[3] – y1 = m(clippingWindow[0] – x1)
+				//(y2-y1) / (x2-x1) * (clippingWindow[0]-x1) + y1
+				clippingPolygonVerticies[j] = ((polygonVerticies[i + 2] - polygonVerticies[i])) / (polygonVerticies[i + 3] - polygonVerticies[i + 1]) * (clippingWindow[3] - polygonVerticies[i + 1]) + polygonVerticies[i];
+				//std::cout << "\nbruh 32";
+				//std::cout << " j :" << j;
+				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j] = polygonVerticies[i];
+				//std::cout << "\nbruh 31";
+				//std::cout << " j :" << j;
+				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
+			}
+			clippingPolygonVerticies[j] = clippingWindow[3];
+			//std::cout << " j :" << j;
+			//std::cout << " \n" << clippingPolygonVerticies[j];
+
+			//the inside points
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2];
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3];
+			/*std::cout << "\nbruh 3";
+			std::cout << " j :" << j;
+			std::cout << " \n" << clippingPolygonVerticies[j + 2];
+			std::cout << " \n" << clippingPolygonVerticies[j + 3];*/
+			j += 4;
+		}
+		//second case -> inside to inside
+		if (polygonVerticies[i + 1] >= clippingWindow[3] && polygonVerticies[i + 3] >= clippingWindow[3])
+		{
+
+			clippingPolygonVerticies[j] = polygonVerticies[i + 2];		//x2
+			clippingPolygonVerticies[j + 1] = polygonVerticies[i + 3];	//y2
+			/*		std::cout << "\nbruh 3";
+					std::cout << "j :" << j;
+					std::cout << " \n" << clippingPolygonVerticies[j ];
+					std::cout << " \n" << clippingPolygonVerticies[j + 1];*/
+			j += 2;
+		}
+		//third case -> inside to outside -> 1 vertex
+		if (polygonVerticies[i + 1] >= clippingWindow[3] && polygonVerticies[i + 3] < clippingWindow[3])
+		{
+			//x2 - x1 != 0
+			if (polygonVerticies[i + 3] != polygonVerticies[i + 1])
+			{
+				clippingPolygonVerticies[j] = ((polygonVerticies[i + 2] - polygonVerticies[i])) / (polygonVerticies[i + 3] - polygonVerticies[i + 1]) * (clippingWindow	[3] - polygonVerticies[i + 1]) + polygonVerticies[i + 1];
+				/*std::cout << "\nbruh 2" << clippingPolygonVerticies[i];
+				std::cout << " j :" << j;
+				std::cout << " \n" << clippingPolygonVerticies[j + 1];*/
+
+			}
+			else	//the line is completely straight, s = 0 -> y fixed
+			{
+				clippingPolygonVerticies[j] = polygonVerticies[i];
+				//std::cout << "\nbruh 1";
+				//std::cout << " j :" << j;
+				//std::cout << " \n" << clippingPolygonVerticies[j + 1];
+
+			}
+			clippingPolygonVerticies[j] = clippingWindow[3];
+			//std::cout << "\nbruh 0";
+			//std::cout << " j :" << j;
+			//std::cout << " \n" << clippingPolygonVerticies[j];
+			j += 2;
+		}
+	}
+
+
+	//cout << "j :" << j << "\n";
+	//for (int i = 0; i < j; i++)
+	//{
+	//	cout << "clipPolyVs[" << i << "],x : " << clippingPolygonVerticies[i];
+	//	cout << ", clipPolyVs[" << ++i << "],y : " << clippingPolygonVerticies[i];
+	//	cout << "\n";
+	//}
+	//cout << "\n";
+
+
+	//"how to pass an array to another from the pointer" to optimize
+	for (int i = 0; i < j; i++)
+	{
+		polygonVerticies[i] = clippingPolygonVerticies[i];
+	}
+	*size = j + 2; //since thats the final function the + 2 and the command that removes the 2 in polygonclipping can be removed
+}
 
 
 //could be optimized (probably) by only sending the part of the array with pointer to the clipping function
@@ -1682,20 +1685,13 @@ void PolygonClipping()
 			currentPolygonVerticies[i] = polygonVerticies[i + previousOriginalPolygonsVers];
 		}
 
-		//add cycle point (the first two points) ath the end of the single polygon being proccessed
-		//currentPolygonVerticies[polygons[k]] = currentPolygonVerticies[0];
-		//currentPolygonVerticies[polygons[k] + 1] = currentPolygonVerticies[1];
-
 		//clip the polygon
 		//cout << "\ninput size : " << sizeofcurrent << "\n";
-		cout << "\n L\n";
 		LeftClipping(currentPolygonVerticies, &sizeofcurrent);
 		//cout << "\noutput size : " << sizeofcurrent << "\n";
-		//top
-		//sizeofcurrent += 4;// sth like that
-		cout << "\n R\n";
+		//TopClipping(currentPolygonVerticies, &sizeofcurrent);
 		RightClipping(currentPolygonVerticies, &sizeofcurrent);
-		//bottom 
+		//BottomClipping(currentPolygonVerticies, &sizeofcurrent);
 
 		sizeofcurrent -= 2;
 		//add array to clipping array and values
